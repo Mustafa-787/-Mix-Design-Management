@@ -12,6 +12,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="ConcreteLab">
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 
@@ -84,6 +85,12 @@
   .stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 18px;min-width:120px;}
   .stat b{display:block;font-size:19px;color:var(--navy);}
   .stat span{font-size:11px;color:var(--muted);}
+  .stat.ok b{color:var(--ok);} .stat.warn b{color:var(--warn);} .stat.danger b{color:var(--danger);}
+  .card h2 .badge-eng{background:var(--navy);}
+  .chart-desc{font-size:12px;color:var(--muted);margin:0 0 10px;}
+  .chart-legend{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-top:12px;font-size:12px;color:var(--muted);}
+  .chart-legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px;}
+  .chart-legend .sw.diamond{border-radius:2px;transform:rotate(45deg);width:9px;height:9px;}
   footer{text-align:center;color:var(--muted);font-size:11px;padding:20px;}
 </style>
 </head>
@@ -91,7 +98,9 @@
 
 <header>
   <div style="display:flex;align-items:center;gap:12px;">
-    <img src="icons/logo-header.png" alt="BetonLaB" style="width:42px;height:42px;border-radius:9px;flex-shrink:0;">
+    <div style="font-weight:800;font-size:20px;letter-spacing:.3px;flex-shrink:0;direction:ltr;">
+      <span style="color:#e7edf2;">Beton</span><span style="color:#4fb3e8;">LAB</span>
+    </div>
     <div>
       <h1>مدیریت طرح اختلاط و نتایج آزمایش بتن</h1>
       <div class="sub">MOSTAFA AZIZI</div>
@@ -115,6 +124,7 @@
   <div class="tabs">
     <div class="tab active" data-tab="tabMix">طرح اختلاط جدید</div>
     <div class="tab" data-tab="tabSample">ثبت نمونه</div>
+    <div class="tab" data-tab="tabDashboard">داشبرد تحلیل</div>
     <div class="tab" data-tab="tabView">مشاهده و مدیریت داده‌ها</div>
   </div>
 
@@ -203,35 +213,52 @@
     </div>
   </div>
 
-  <!-- TAB: VIEW -->
-  <div class="panel" id="tabView">
+  <!-- TAB: ANALYSIS DASHBOARD -->
+  <div class="panel" id="tabDashboard">
     <div class="stat-strip" id="statStrip"></div>
+    <div class="stat-strip" id="complianceStrip"></div>
 
     <div class="card">
-      <h2>نمودارهای مقایسه‌ای مقاومت (همه طرح‌ها)</h2>
+      <h2><span class="badge badge-eng">تحلیل</span> فاصله مقاومت طراحی با مقاومت تست‌شده</h2>
+      <p class="chart-desc">مقایسه‌ی مقاومت مشخصه طراحی (F'c) و مقاومت متوسط مورد نیاز (F'cr) با میانگین نتایج واقعی آزمایش هر طرح اختلاط (ترجیحاً نمونه‌های ۲۸ روزه).</p>
+      <div id="gapChartEmpty" class="empty">برای نمایش این نمودار، حداقل یک طرح اختلاط با F'c ثبت‌شده و حداقل یک نمونه‌ی دارای نتیجه لازم است.</div>
+      <div id="gapChartWrap" style="display:none">
+        <div id="gapChartHeight" style="height:280px"><canvas id="chartGap"></canvas></div>
+        <div class="chart-legend">
+          <span><i class="sw" style="background:#1f8a4c"></i> تست‌شده ≥ طراحی (مطلوب)</span>
+          <span><i class="sw" style="background:#c0392b"></i> تست‌شده &lt; طراحی (کمبود)</span>
+          <span><i class="sw diamond" style="background:#0f2942"></i> F'c — مقاومت طراحی</span>
+          <span><i class="sw diamond" style="background:#b8860b"></i> F'cr — مقاومت متوسط موردنیاز</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="badge badge-eng">مقایسه</span> نمودارهای مقایسه‌ای مقاومت (همه طرح‌ها)</h2>
       <div style="margin-bottom:28px">
-        <p style="font-size:12px;color:var(--muted);margin:0 0 8px">میانگین مقاومت هر طرح در سنین استاندارد (۷ / ۲۸ / ۹۰ روزه)</p>
+        <p class="chart-desc">میانگین مقاومت هر طرح در سنین استاندارد (۷ / ۲۸ / ۹۰ روزه)</p>
         <div style="height:380px"><canvas id="chartBarAge"></canvas></div>
       </div>
       <div>
-        <p style="font-size:12px;color:var(--muted);margin:0 0 8px">روند رشد مقاومت بر حسب سن (هر خط یک طرح اختلاط)</p>
+        <p class="chart-desc">روند رشد مقاومت بر حسب سن (هر خط یک طرح اختلاط)</p>
         <div style="height:380px"><canvas id="chartLineGrowth"></canvas></div>
       </div>
     </div>
 
     <div class="card">
-      <h2>جزئیات یک طرح اختلاط</h2>
+      <h2><span class="badge badge-eng">جزئیات</span> جزئیات یک طرح اختلاط</h2>
       <div class="toolbar">
         <select class="grow" id="chartMixSelect"><option value="">— یک طرح اختلاط را انتخاب کنید —</option></select>
       </div>
       <div id="mixDetailEmpty" class="empty">یک طرح اختلاط از لیست بالا انتخاب کنید تا جزئیاتش نمایش داده شود.</div>
       <div id="mixDetailCharts" style="display:none">
-        <div style="margin-bottom:28px">
-          <p style="font-size:12px;color:var(--muted);margin:0 0 8px">مقاومت نمونه‌های ثبت‌شده این طرح بر حسب سن</p>
+        <div style="margin-bottom:10px">
+          <p class="chart-desc">مقاومت نمونه‌های ثبت‌شده این طرح بر حسب سن، در مقایسه با خطوط مرجع F'c و F'cr</p>
           <div style="height:340px"><canvas id="chartMixAge"></canvas></div>
+          <div class="chart-legend" id="mixAgeLegend"></div>
         </div>
-        <div>
-          <p style="font-size:12px;color:var(--muted);margin:0 0 8px">درصد اجزای تشکیل‌دهنده مخلوط (بر اساس جرم)</p>
+        <div style="margin-top:28px">
+          <p class="chart-desc">درصد اجزای تشکیل‌دهنده مخلوط (بر اساس جرم)</p>
           <div style="height:340px;max-width:420px;margin:0 auto"><canvas id="chartMixComposition"></canvas></div>
           <div class="table-wrap" style="max-width:420px;margin:14px auto 0">
             <table id="tblMixComposition"><thead></thead><tbody></tbody></table>
@@ -241,10 +268,13 @@
     </div>
 
     <div class="card">
-      <h2>خلاصه مقاومت بر اساس سن (میانگین هر طرح)</h2>
+      <h2><span class="badge badge-eng">خلاصه</span> خلاصه مقاومت بر اساس سن (میانگین هر طرح)</h2>
       <div class="table-wrap"><table id="tblSummary"><thead></thead><tbody></tbody></table></div>
     </div>
+  </div>
 
+  <!-- TAB: VIEW -->
+  <div class="panel" id="tabView">
     <div class="card">
       <h2>طرح‌های اختلاط ثبت‌شده</h2>
       <div class="toolbar">
@@ -262,6 +292,7 @@
       <div class="table-wrap"><table id="tblSample"><thead></thead><tbody></tbody></table></div>
     </div>
   </div>
+
 </main>
 
 <footer>ابزار داخلی ConcreteLab — داده‌ها فقط روی سیستم شما ذخیره می‌شوند، هیچ اطلاعاتی ارسال نمی‌شود.</footer>
@@ -494,7 +525,7 @@ function requireFile(){
 function activateTab(tabId){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active', x.dataset.tab===tabId));
   document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active', x.id===tabId));
-  if(tabId === 'tabView') renderAll();
+  if(tabId === 'tabView' || tabId === 'tabDashboard') renderAll();
 }
 
 function clearMixForm(){
@@ -850,17 +881,262 @@ function renderSampleTable(){
   </tr>`).join('');
 }
 
-/* ============ Charts ============ */
-let chartBarInstance = null, chartLineInstance = null;
+/* ============ Chart.js engineering setup (plugins, palette, unit helpers) ============ */
 const CHART_COLORS = ['#0e8a7d','#1a56b0','#b8860b','#6a3fb5','#c0392b','#2c8f4a','#d17a22','#3d5a80'];
+const PSI_PER_MPA = 145.038;
+
+function toMPa(value, unit){
+  const v = Number(value);
+  if(value === '' || value === undefined || value === null || Number.isNaN(v)) return null;
+  return unit === 'PSI' ? v / PSI_PER_MPA : v;
+}
+
+// ACI 318/214 acceptance: no single test result should fall more than
+// 3.5 MPa (500 psi) below the specified strength f'c.
+function individualMinMPa(fcRaw, unit){
+  const fc = Number(fcRaw);
+  if(Number.isNaN(fc)) return null;
+  const marginOriginal = unit === 'PSI' ? 500 : 3.5;
+  return toMPa(fc - marginOriginal, unit);
+}
+
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.font.family = "Vazirmatn, Tahoma, Segoe UI, sans-serif";
+  Chart.defaults.color = '#1c2b36';
+  Chart.defaults.borderColor = 'rgba(226,232,238,.9)';
+  Chart.defaults.plugins.tooltip.rtl = true;
+  Chart.defaults.plugins.tooltip.titleFont = { family: "Vazirmatn, Tahoma", weight: '700' };
+  Chart.defaults.plugins.tooltip.bodyFont = { family: "Vazirmatn, Tahoma" };
+  Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(15,41,66,.94)';
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 6;
+  Chart.defaults.plugins.tooltip.displayColors = true;
+
+  // Draws dashed horizontal/vertical reference lines (e.g. F'c, F'cr) with a label.
+  const ReferenceLinesPlugin = {
+    id: 'referenceLines',
+    afterDatasetsDraw(chart){
+      const cfg = chart.options.plugins && chart.options.plugins.referenceLines;
+      const lines = cfg && cfg.lines;
+      if(!lines || !lines.length) return;
+      const { ctx, chartArea, scales } = chart;
+      if(!chartArea) return;
+      ctx.save();
+      lines.forEach(line=>{
+        if(line.value === null || line.value === undefined || Number.isNaN(line.value)) return;
+        const axis = line.axis === 'x' ? scales.x : scales.y;
+        if(!axis) return;
+        const pixel = axis.getPixelForValue(line.value);
+        ctx.beginPath();
+        ctx.setLineDash(line.dash || [6,4]);
+        ctx.lineWidth = line.width || 1.6;
+        ctx.strokeStyle = line.color || '#888';
+        if(line.axis === 'x'){
+          ctx.moveTo(pixel, chartArea.top);
+          ctx.lineTo(pixel, chartArea.bottom);
+        } else {
+          ctx.moveTo(chartArea.left, pixel);
+          ctx.lineTo(chartArea.right, pixel);
+        }
+        ctx.stroke();
+        if(line.label){
+          ctx.setLineDash([]);
+          ctx.fillStyle = line.color || '#888';
+          ctx.font = '700 10.5px Vazirmatn, Tahoma';
+          if(line.axis === 'x'){
+            ctx.textAlign = 'center';
+            ctx.fillText(line.label, pixel, chartArea.top - 4);
+          } else {
+            ctx.textAlign = 'right';
+            ctx.fillText(line.label, chartArea.right - 4, pixel - 5);
+          }
+        }
+      });
+      ctx.restore();
+    }
+  };
+
+  // Draws small numeric value labels above/at each bar for quick reading.
+  const ValueLabelsPlugin = {
+    id: 'valueLabels',
+    afterDatasetsDraw(chart){
+      const cfg = chart.options.plugins && chart.options.plugins.valueLabels;
+      if(!cfg || !cfg.enabled) return;
+      const { ctx } = chart;
+      ctx.save();
+      ctx.font = '700 10.5px Vazirmatn, Tahoma';
+      ctx.fillStyle = cfg.color || '#1c2b36';
+      ctx.textAlign = 'center';
+      chart.data.datasets.forEach((ds, dsIndex)=>{
+        const meta = chart.getDatasetMeta(dsIndex);
+        if(meta.hidden) return;
+        meta.data.forEach((el, i)=>{
+          const raw = ds.data[i];
+          if(raw === null || raw === undefined) return;
+          const val = Array.isArray(raw) ? raw[1] : raw;
+          if(val === null || val === undefined) return;
+          const pos = el.tooltipPosition ? el.tooltipPosition() : { x: el.x, y: el.y };
+          ctx.fillText(Number(val).toFixed(1), pos.x, pos.y - 7);
+        });
+      });
+      ctx.restore();
+    }
+  };
+
+  // Draws small diamond markers at specific (x-value, category-index) points —
+  // used on the gap chart to mark F'c / F'cr targets over the range bars.
+  const TargetMarkersPlugin = {
+    id: 'targetMarkers',
+    afterDatasetsDraw(chart){
+      const cfg = chart.options.plugins && chart.options.plugins.targetMarkers;
+      const points = cfg && cfg.points;
+      if(!points || !points.length) return;
+      const { ctx, scales } = chart;
+      ctx.save();
+      points.forEach(pt=>{
+        const x = scales.x.getPixelForValue(pt.x);
+        const y = scales.y.getPixelForValue(pt.y);
+        const s = 6;
+        ctx.beginPath();
+        ctx.moveTo(x, y - s); ctx.lineTo(x + s, y); ctx.lineTo(x, y + s); ctx.lineTo(x - s, y);
+        ctx.closePath();
+        ctx.fillStyle = pt.color || '#b8860b';
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#fff';
+        ctx.stroke();
+      });
+      ctx.restore();
+    }
+  };
+
+  Chart.register(ReferenceLinesPlugin, ValueLabelsPlugin, TargetMarkersPlugin);
+}
+
+let chartBarInstance = null, chartLineInstance = null, chartGapInstance = null;
 
 function renderCharts(){
   if(typeof Chart === 'undefined') return;
+  renderComplianceStrip();
+  renderGapChart();
   renderBarChart();
   renderLineChart();
   populateChartMixSelect();
 }
 
+/* ============ Compliance KPI strip ============ */
+function renderComplianceStrip(){
+  const strip = document.getElementById('complianceStrip');
+  if(!strip) return;
+  const rows = computeMixGapData().filter(r=>r.avgTested !== null);
+  if(!rows.length){ strip.innerHTML = ''; return; }
+  const passCount = rows.filter(r=>r.avgTested >= r.fc).length;
+  const failCount = rows.length - passCount;
+  const avgDeltaPct = rows.reduce((a,r)=>a + ((r.avgTested - r.fc) / r.fc * 100), 0) / rows.length;
+  strip.innerHTML = `
+    <div class="stat ok"><b>${passCount}</b><span>طرح با مقاومت تست‌شده ≥ طراحی</span></div>
+    <div class="stat ${failCount ? 'danger' : ''}"><b>${failCount}</b><span>طرح با مقاومت تست‌شده کمتر از طراحی</span></div>
+    <div class="stat ${avgDeltaPct >= 0 ? 'ok' : 'danger'}"><b>${avgDeltaPct >= 0 ? '+' : ''}${avgDeltaPct.toFixed(1)}%</b><span>میانگین فاصله با مقاومت طراحی</span></div>
+  `;
+}
+
+/* ============ Design vs Tested gap chart ============ */
+function computeMixGapData(){
+  return mixes.map(m=>{
+    const fc = toMPa(m.fc, m.unit);
+    const fcr = (m.fcr !== '' && m.fcr !== undefined) ? toMPa(m.fcr, m.unit) : null;
+    let usedAge = '28';
+    let pool = samples.filter(s=>s.mixName===m.name && String(s.age)==='28' && s.strength!=='');
+    if(!pool.length){
+      const ages = [...new Set(samples.filter(s=>s.mixName===m.name && s.strength!=='').map(s=>String(s.age)))];
+      if(ages.length){
+        usedAge = ages.sort((a,b)=>Number(b)-Number(a))[0];
+        pool = samples.filter(s=>s.mixName===m.name && String(s.age)===usedAge && s.strength!=='');
+      }
+    }
+    const vals = pool.map(displayStrength);
+    const avgTested = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+    return { name: m.name, fc, fcr, avgTested, usedAge, n: vals.length };
+  }).filter(r=>r.fc !== null);
+}
+
+function renderGapChart(){
+  const ctx = document.getElementById('chartGap');
+  if(!ctx) return;
+  const emptyEl = document.getElementById('gapChartEmpty');
+  const wrapEl = document.getElementById('gapChartWrap');
+  const rows = computeMixGapData().filter(r=>r.avgTested !== null);
+
+  if(!rows.length){
+    if(emptyEl) emptyEl.style.display = 'block';
+    if(wrapEl) wrapEl.style.display = 'none';
+    if(chartGapInstance){ chartGapInstance.destroy(); chartGapInstance = null; }
+    return;
+  }
+  if(emptyEl) emptyEl.style.display = 'none';
+  if(wrapEl) wrapEl.style.display = 'block';
+  document.getElementById('gapChartHeight').style.height = Math.max(220, rows.length * 58 + 40) + 'px';
+
+  const labels = rows.map(r=>r.name);
+  const rangeData = rows.map(r=>[Math.min(r.fc, r.avgTested), Math.max(r.fc, r.avgTested)]);
+  const bg = rows.map(r=> r.avgTested >= r.fc ? 'rgba(31,138,76,.55)' : 'rgba(192,57,43,.55)');
+  const border = rows.map(r=> r.avgTested >= r.fc ? '#1f8a4c' : '#c0392b');
+
+  const targetMarkers = [];
+  rows.forEach((r,i)=>{
+    targetMarkers.push({ x: r.fc, y: i, color: '#0f2942' });
+    if(r.fcr !== null) targetMarkers.push({ x: r.fcr, y: i, color: '#b8860b' });
+  });
+
+  if(chartGapInstance) chartGapInstance.destroy();
+  chartGapInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'بازه طراحی ↔ تست‌شده',
+        data: rangeData,
+        backgroundColor: bg,
+        borderColor: border,
+        borderWidth: 1.5,
+        borderSkipped: false,
+        borderRadius: 5,
+        barThickness: 22
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        targetMarkers: { points: targetMarkers },
+        tooltip: {
+          callbacks: {
+            label: (c)=>{
+              const r = rows[c.dataIndex];
+              const delta = r.avgTested - r.fc;
+              const sign = delta >= 0 ? '+' : '';
+              const lines = [
+                `F'c طراحی: ${r.fc.toFixed(1)} MPa`,
+                `میانگین تست (${r.usedAge} روزه، n=${r.n}): ${r.avgTested.toFixed(1)} MPa`,
+                `فاصله با طراحی: ${sign}${delta.toFixed(1)} MPa (${sign}${(delta/r.fc*100).toFixed(1)}%)`
+              ];
+              if(r.fcr !== null) lines.splice(1, 0, `F'cr مورد نیاز: ${r.fcr.toFixed(1)} MPa`);
+              return lines;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+}
+
+/* ============ Comparison charts (all mixes) ============ */
 function renderBarChart(){
   const ctx = document.getElementById('chartBarAge');
   if(!ctx) return;
@@ -871,7 +1147,10 @@ function renderBarChart(){
       const vals = samples.filter(s=>s.mixName===m.name && String(s.age)===age && s.strength!=='').map(displayStrength);
       return vals.length ? Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*100)/100 : null;
     }),
-    backgroundColor: [ '#a8d5cd','#0e8a7d','#0a5c53' ][i] || CHART_COLORS[i]
+    backgroundColor: [ '#a8d5cd','#0e8a7d','#0a5c53' ][i] || CHART_COLORS[i],
+    borderRadius: 5,
+    borderSkipped: false,
+    maxBarThickness: 34
   }));
   if(chartBarInstance) chartBarInstance.destroy();
   chartBarInstance = new Chart(ctx, {
@@ -880,10 +1159,15 @@ function renderBarChart(){
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels:{font:{family:'Vazirmatn, Tahoma'}} } },
+      categoryPercentage: 0.7,
+      barPercentage: 0.85,
+      plugins: {
+        legend: { position: 'bottom' },
+        valueLabels: { enabled: true }
+      },
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' } },
-        x: { ticks: { font:{family:'Vazirmatn, Tahoma'} } }
+        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        x: { grid: { display: false } }
       }
     }
   });
@@ -899,7 +1183,12 @@ function renderLineChart(){
       return vals.length ? Math.round((vals.reduce((a,b)=>a+b,0)/vals.length)*100)/100 : null;
     });
     const color = CHART_COLORS[i % CHART_COLORS.length];
-    return { label: m.name, data, borderColor: color, backgroundColor: color, tension: 0.25, spanGaps: true };
+    return {
+      label: m.name, data, borderColor: color, backgroundColor: color,
+      tension: 0, spanGaps: true, borderWidth: 2,
+      pointRadius: 4, pointHoverRadius: 6, pointBackgroundColor: color,
+      pointBorderColor: '#fff', pointBorderWidth: 1.5, fill: false
+    };
   });
   if(chartLineInstance) chartLineInstance.destroy();
   chartLineInstance = new Chart(ctx, {
@@ -908,10 +1197,10 @@ function renderLineChart(){
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels:{font:{family:'Vazirmatn, Tahoma'}} } },
+      plugins: { legend: { position: 'bottom' } },
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' } },
-        x: { ticks: { font:{family:'Vazirmatn, Tahoma'} } }
+        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        x: { grid: { display: false } }
       }
     }
   });
@@ -944,21 +1233,43 @@ function renderMixDetailCharts(mixName){
   document.getElementById('mixDetailEmpty').style.display = 'none';
   document.getElementById('mixDetailCharts').style.display = 'block';
 
-  /* --- strength by age (individual samples, grouped by age) --- */
+  /* --- strength by age vs. F'c / F'cr reference lines, colored by ACI 214 compliance --- */
+  const fcMPa = toMPa(m.fc, m.unit);
+  const fcrMPa = (m.fcr !== '' && m.fcr !== undefined) ? toMPa(m.fcr, m.unit) : null;
+  const indivMinMPa = individualMinMPa(m.fc, m.unit);
+
   const mySamples = samples.filter(s=>s.mixName===mixName && s.strength!=='');
   const ages = [...new Set(mySamples.map(s=>Number(s.age)))].sort((a,b)=>a-b);
   const maxCount = Math.max(1, ...ages.map(age=>mySamples.filter(s=>Number(s.age)===age).length));
+
+  function complianceColor(val){
+    if(val === null || val === undefined) return CHART_COLORS[0];
+    if(indivMinMPa !== null && val < indivMinMPa) return '#c0392b';
+    if(fcMPa !== null && val < fcMPa) return '#b8860b';
+    return '#1f8a4c';
+  }
+
   const datasets = [];
   for(let i=0;i<maxCount;i++){
+    const data = ages.map(age=>{
+      const vals = mySamples.filter(s=>Number(s.age)===age).map(displayStrength);
+      return vals[i] !== undefined ? vals[i] : null;
+    });
     datasets.push({
       label: 'نمونه ' + (i+1),
-      data: ages.map(age=>{
-        const vals = mySamples.filter(s=>Number(s.age)===age).map(displayStrength);
-        return vals[i] !== undefined ? vals[i] : null;
-      }),
-      backgroundColor: CHART_COLORS[i % CHART_COLORS.length]
+      data,
+      backgroundColor: data.map(complianceColor),
+      borderRadius: 4,
+      borderSkipped: false,
+      maxBarThickness: 30
     });
   }
+
+  const refLines = [];
+  if(fcMPa !== null) refLines.push({ axis:'y', value: fcMPa, color:'#0f2942', label:`F'c ${fcMPa.toFixed(1)}` });
+  if(fcrMPa !== null) refLines.push({ axis:'y', value: fcrMPa, color:'#b8860b', label:`F'cr ${fcrMPa.toFixed(1)}` });
+  if(indivMinMPa !== null) refLines.push({ axis:'y', value: indivMinMPa, color:'#c0392b', dash:[3,3], label:`حداقل تکی ${indivMinMPa.toFixed(1)}` });
+
   const ctx1 = document.getElementById('chartMixAge');
   if(chartMixAgeInstance) chartMixAgeInstance.destroy();
   chartMixAgeInstance = new Chart(ctx1, {
@@ -967,13 +1278,27 @@ function renderMixDetailCharts(mixName){
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels:{font:{family:'Vazirmatn, Tahoma'}} }, title: { display: true, text: mixName, font:{family:'Vazirmatn, Tahoma', size:13} } },
+      plugins: {
+        legend: { display: false },
+        title: { display: true, text: mixName, font: { family:'Vazirmatn, Tahoma', size: 13 } },
+        referenceLines: { lines: refLines },
+        valueLabels: { enabled: true }
+      },
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' } },
-        x: { ticks: { font:{family:'Vazirmatn, Tahoma'} } }
+        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        x: { grid: { display: false } }
       }
     }
   });
+
+  const legendEl = document.getElementById('mixAgeLegend');
+  if(legendEl){
+    legendEl.innerHTML = `
+      <span><i class="sw" style="background:#1f8a4c"></i> قبول (≥ F'c)</span>
+      <span><i class="sw" style="background:#b8860b"></i> بین حداقل تکی و F'c</span>
+      <span><i class="sw" style="background:#c0392b"></i> مردود (کمتر از حداقل مجاز تکی)</span>
+    `;
+  }
 
   /* --- mix composition by mass --- */
   const water = Number(m.basewater) || 0;
@@ -993,7 +1318,7 @@ function renderMixDetailCharts(mixName){
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: { position: 'bottom', labels:{font:{family:'Vazirmatn, Tahoma'}} },
+        legend: { position: 'bottom' },
         tooltip: { callbacks: { label: (ctx)=>{
           const pct = totalMass ? (ctx.parsed/totalMass*100).toFixed(1) : '0';
           return ctx.label + ': ' + ctx.parsed + ' kg/m³ (' + pct + '%)';

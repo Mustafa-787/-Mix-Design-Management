@@ -1,18 +1,18 @@
 // ConcreteLab Service Worker
 // Bump CACHE_NAME every time you edit index.html (or anything else here)
 // so returning users get the new version instead of a stale cached copy.
-const CACHE_NAME = 'concretelab-cache-v2';
+const CACHE_NAME = 'concretelab-cache-v7';
 
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.json',
+  './favicon.ico',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-maskable-192.png',
   './icons/icon-maskable-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/logo-header.png'
+  './icons/apple-touch-icon.png'
 ];
 
 // Install: pre-cache the app shell
