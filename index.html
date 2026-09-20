@@ -62,6 +62,8 @@
   .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:#fff;}
   .field.span-2{grid-column:span 2;}
   .field.span-4{grid-column:1/-1;}
+  .form-section-title{grid-column:1/-1;font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.2px;border-top:1px dashed var(--border);padding-top:14px;margin-top:2px;}
+  .grid > .form-section-title:first-child{border-top:none;padding-top:0;margin-top:0;}
   .actions-row{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
   table{width:100%;border-collapse:collapse;font-size:12.5px;}
   th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
@@ -141,21 +143,94 @@
             <option value="PSI">PSI</option>
           </select>
         </div>
-        <div class="field"><label>F'c — مقاومت مشخصه طرح (ACI 211)</label><input id="m_fc" type="number" step="0.1" placeholder="مثلاً 25"></div>
-        <div class="field"><label>F'cr — مقاومت متوسط مورد نیاز (ACI 211)</label><input id="m_fcr" type="number" step="0.1" placeholder="مثلاً 33"></div>
+
+        <div class="form-section-title">معیار مقاومت طراحی (ACI 211 / ACI 301 / ACI 214 / ACI 318 §26.12.3)</div>
+        <div class="field"><label>F'c — مقاومت مشخصه طرح</label><input id="m_fc" type="number" step="0.1" placeholder="مثلاً 25"></div>
+        <div class="field span-2"><label>F'cr — مقاومت متوسط مورد نیاز</label>
+          <div style="display:flex;gap:6px">
+            <input id="m_fcr" type="number" step="0.1" placeholder="مثلاً 33" style="flex:1">
+            <button type="button" class="btn-outline btn-sm" id="btnCalcFcr" style="white-space:nowrap">محاسبه خودکار</button>
+          </div>
+        </div>
+        <div class="field"><label>روش تعیین F'cr</label>
+          <select id="m_fcrmethod">
+            <option value="no-data">بدون داده آماری (جدول ACI)</option>
+            <option value="std-dev">بر اساس انحراف معیار (s)</option>
+            <option value="override">مقدار دستی (Override)</option>
+          </select>
+        </div>
+        <div class="field"><label>انحراف معیار s (MPa)</label><input id="m_stddev" type="number" step="0.01"></div>
+        <div class="field"><label>تعداد آزمون‌های سابقه (n)</label><input id="m_testn" type="number" step="1"></div>
+        <div class="field"><label>نسبت آب به سیمان w/cm</label><input id="m_wcm" type="number" step="0.001" placeholder="0.440"></div>
+        <div class="field"><label>منبع w/cm</label>
+          <select id="m_wcmsource">
+            <option value="auto">جدول ۵.۳.۴ (خودکار)</option>
+            <option value="manual">دستی</option>
+            <option value="durability">محدودیت دوام (Durability)</option>
+          </select>
+        </div>
+        <div class="field span-4" id="fcrNote" style="font-size:11.5px;color:var(--muted);margin-top:-6px"></div>
+
+        <div class="form-section-title">مشخصات اجرایی و محیطی</div>
         <div class="field"><label>اسلامپ (mm یا in)</label><input id="m_slump" placeholder="75"></div>
         <div class="field"><label>حداکثر اندازه سنگدانه NMSA (mm)</label><input id="m_nmsa" placeholder="19"></div>
         <div class="field"><label>هوا Air (%)</label><input id="m_air" type="number" step="0.1" placeholder="2.0"></div>
+        <div class="field"><label>بتن هوادار (Air-Entrained)؟</label>
+          <select id="m_airentrained"><option value="No">خیر</option><option value="Yes">بله</option></select>
+        </div>
+        <div class="field span-2"><label>کلاس مواجهه (Exposure Class)</label><input id="m_exposure" placeholder="مثلاً F1, S0, W0, C1"></div>
         <div class="field"><label>دما Temp (°C)</label><input id="m_temp" type="number" step="0.1" placeholder="25"></div>
-        <div class="field span-2"><label>افزودنی Admixture</label><input id="m_admix" placeholder="None / نوع و درصد"></div>
+
+        <div class="form-section-title">افزودنی و مواد جایگزین سیمانی (SCM)</div>
+        <div class="field span-2"><label>افزودنی شیمیایی Admixture</label><input id="m_admix" placeholder="None / نوع و درصد"></div>
+        <div class="field"><label>نوع SCM</label>
+          <select id="m_scmtype">
+            <option value="none">None</option>
+            <option value="flyash">خاکستر بادی (Fly Ash)</option>
+            <option value="slag">سرباره (Slag)</option>
+            <option value="silicafume">میکروسیلیس (Silica Fume)</option>
+            <option value="multiple">ترکیبی</option>
+          </select>
+        </div>
+        <div class="field"><label>جایگزینی خاکستر بادی (%)</label><input id="m_flyash" type="number" step="0.1"></div>
+        <div class="field"><label>جایگزینی سرباره (%)</label><input id="m_slag" type="number" step="0.1"></div>
+        <div class="field"><label>جایگزینی میکروسیلیس (%)</label><input id="m_silicafume" type="number" step="0.1"></div>
+
+        <div class="form-section-title">آب و سیمان (بر مترمکعب)</div>
         <div class="field"><label>آب پایه Base Water (kg/m³)</label><input id="m_basewater" type="number" step="0.1"></div>
         <div class="field"><label>آب اصلاحی Adjust Water (kg/m³ یا %)</label><input id="m_adwater" type="number" step="0.1"></div>
         <div class="field"><label>سیمان C (kg/m³)</label><input id="m_cement" type="number" step="0.1"></div>
         <div class="field"><label>اصلاح سیمان Cement Adjust (kg/m³ یا %)</label><input id="m_cementadj" type="number" step="0.1"></div>
+        <div class="field"><label>وزن مخصوص سیمان پرتلند</label><input id="m_cement_sg" type="number" step="0.01" placeholder="3.15"></div>
+
+        <div class="form-section-title">درشت‌دانه (Coarse Aggregate)</div>
         <div class="field"><label>درشت‌دانه — حالت SSD (kg/m³)</label><input id="m_ca_ssd" type="number" step="0.1"></div>
         <div class="field"><label>درشت‌دانه — حالت OD (kg/m³)</label><input id="m_ca_od" type="number" step="0.1"></div>
+        <div class="field"><label>گردگوشه (شکسته‌نشده)؟</label>
+          <select id="m_ca_rounded"><option value="No">خیر</option><option value="Yes">بله</option></select>
+        </div>
+        <div class="field"><label>وزن مخصوص SSD</label><input id="m_ca_sg" type="number" step="0.01" placeholder="2.45"></div>
+        <div class="field"><label>وزن واحد متراکم خشک OD (kg/m³)</label><input id="m_ca_unitweight" type="number" step="1" placeholder="1602"></div>
+        <div class="field"><label>درصد جذب آب (%)</label><input id="m_ca_absorption" type="number" step="0.1"></div>
+        <div class="field"><label>رطوبت کل (%)</label><input id="m_ca_moisture" type="number" step="0.1"></div>
+
+        <div class="form-section-title">ریزدانه (Fine Aggregate)</div>
         <div class="field"><label>ریزدانه — حالت SSD (kg/m³)</label><input id="m_fa_ssd" type="number" step="0.1"></div>
         <div class="field"><label>ریزدانه — حالت OD (kg/m³)</label><input id="m_fa_od" type="number" step="0.1"></div>
+        <div class="field"><label>شن و ماسه مصنوعی (شکسته)؟</label>
+          <select id="m_fa_manufactured"><option value="No">خیر</option><option value="Yes">بله</option></select>
+        </div>
+        <div class="field"><label>مدول نرمی (FM)</label><input id="m_fa_fm" type="number" step="0.01" placeholder="2.80"></div>
+        <div class="field"><label>وزن مخصوص SSD</label><input id="m_fa_sg" type="number" step="0.01" placeholder="2.65"></div>
+        <div class="field"><label>درصد جذب آب (%)</label><input id="m_fa_absorption" type="number" step="0.1"></div>
+        <div class="field"><label>رطوبت کل (%)</label><input id="m_fa_moisture" type="number" step="0.1"></div>
+
+        <div class="form-section-title">نسبت درشت‌دانه به ریزدانه</div>
+        <div class="field"><label>Override نسبت CA:FA؟</label>
+          <select id="m_cafa_override"><option value="No">خیر</option><option value="Yes">بله</option></select>
+        </div>
+        <div class="field span-2"><label>نسبت CA:FA</label><input id="m_cafa_ratio" placeholder="مثلاً 1.20:1"></div>
+
         <div class="field span-4"><label>یادداشت</label><textarea id="m_note" rows="2"></textarea></div>
       </div>
       <div class="actions-row">
@@ -230,6 +305,15 @@
           <span><i class="sw diamond" style="background:#0f2942"></i> F'c — مقاومت طراحی</span>
           <span><i class="sw diamond" style="background:#b8860b"></i> F'cr — مقاومت متوسط موردنیاز</span>
         </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><span class="badge badge-eng">ارزیابی</span> مطابقت با ACI 318 §26.12.3 (معیارهای ACI 214)</h2>
+      <p class="chart-desc">دو معیار پذیرش نتایج آزمایش روی نمونه‌های سن طراحی هر طرح (ترجیحاً ۲۸ روزه، به‌ترتیب تاریخ شکست): (۱) هیچ نتیجه‌ی تکی نباید بیش از حد مجاز (F'c − 3.5MPa یا 500psi) کمتر از F'c باشد؛ (۲) میانگین هر سه آزمون متوالی باید ≥ F'c باشد.</p>
+      <div id="aciComplianceEmpty" class="empty">برای این ارزیابی، حداقل یک طرح اختلاط با F'c و حداقل یک نمونه‌ی دارای نتیجه لازم است.</div>
+      <div class="table-wrap" id="aciComplianceWrap" style="display:none">
+        <table id="tblAciCompliance"><thead></thead><tbody></tbody></table>
       </div>
     </div>
 
@@ -337,8 +421,18 @@ let samples = []; // {id,mixName,num,age,castdate,breakdate,moldLabel,shape,dim,
 let editingMixId = null;
 let editingSampleId = null;
 
-const MIX_HEADERS = ["ID","نام طرح اختلاط","تاریخ ثبت","واحد مقاومت","F'c","F'cr","اسلامپ","NMSA (mm)","هوا Air (%)","دما (°C)","افزودنی","آب پایه (kg/m³)","آب اصلاحی","سیمان C (kg/m³)","اصلاح سیمان","درشت‌دانه SSD (kg/m³)","درشت‌دانه OD (kg/m³)","ریزدانه SSD (kg/m³)","ریزدانه OD (kg/m³)","یادداشت"];
-const MIX_KEYS    = ["id","name","date","unit","fc","fcr","slump","nmsa","air","temp","admix","basewater","adwater","cement","cementadj","ca_ssd","ca_od","fa_ssd","fa_od","note"];
+const MIX_HEADERS = ["ID","نام طرح اختلاط","تاریخ ثبت","واحد مقاومت","F'c","F'cr","اسلامپ","NMSA (mm)","هوا Air (%)","دما (°C)","افزودنی","آب پایه (kg/m³)","آب اصلاحی","سیمان C (kg/m³)","اصلاح سیمان","درشت‌دانه SSD (kg/m³)","درشت‌دانه OD (kg/m³)","ریزدانه SSD (kg/m³)","ریزدانه OD (kg/m³)","یادداشت",
+  "کلاس مواجهه","هوادار (Air-Entrained)","روش F'cr","انحراف معیار s","تعداد آزمون n","w/cm","منبع w/cm",
+  "نوع SCM","خاکستر بادی (%)","سرباره (%)","میکروسیلیس (%)",
+  "ریزدانه مصنوعی؟","مدول نرمی ریزدانه (FM)","وزن مخصوص ریزدانه SSD","جذب آب ریزدانه (%)","رطوبت ریزدانه (%)",
+  "درشت‌دانه گردگوشه؟","وزن مخصوص درشت‌دانه SSD","وزن واحد OD درشت‌دانه (kg/m³)","جذب آب درشت‌دانه (%)","رطوبت درشت‌دانه (%)",
+  "وزن مخصوص سیمان","Override نسبت CA:FA؟","نسبت CA:FA"];
+const MIX_KEYS    = ["id","name","date","unit","fc","fcr","slump","nmsa","air","temp","admix","basewater","adwater","cement","cementadj","ca_ssd","ca_od","fa_ssd","fa_od","note",
+  "exposure","airentrained","fcrmethod","stddev","testn","wcm","wcmsource",
+  "scmtype","flyash","slag","silicafume",
+  "fa_manufactured","fa_fm","fa_sg","fa_absorption","fa_moisture",
+  "ca_rounded","ca_sg","ca_unitweight","ca_absorption","ca_moisture",
+  "cement_sg","cafa_override","cafa_ratio"];
 
 const SAMPLE_HEADERS = ["ID","طرح اختلاط","شماره نمونه","سن (روز)","تاریخ ساخت","تاریخ شکست","نوع قالب","شکل","ابعاد (mm)","سطح مقطع (mm²)","نیروی شکست (kN)","مقاومت اندازه‌گیری‌شده (MPa)","ضریب تبدیل به معادل استوانه‌ای","یادداشت ضریب تبدیل","معادل استوانه‌ای (MPa)","یادداشت"];
 const SAMPLE_KEYS    = ["id","mixName","num","age","castdate","breakdate","moldLabel","shape","dim","area","load","strength","convFactor","convNote","equivalentStrength","note"];
@@ -532,6 +626,14 @@ function clearMixForm(){
   document.querySelectorAll('#mixForm input, #mixForm textarea').forEach(el=>el.value='');
   document.getElementById('m_date').value = todayISO();
   document.getElementById('m_unit').value = 'MPa';
+  document.getElementById('m_fcrmethod').value = 'no-data';
+  document.getElementById('m_wcmsource').value = 'auto';
+  document.getElementById('m_airentrained').value = 'No';
+  document.getElementById('m_scmtype').value = 'none';
+  document.getElementById('m_fa_manufactured').value = 'No';
+  document.getElementById('m_ca_rounded').value = 'No';
+  document.getElementById('m_cafa_override').value = 'No';
+  document.getElementById('fcrNote').textContent = '';
 }
 function cancelMixEdit(){
   editingMixId = null;
@@ -558,6 +660,30 @@ function fillMixForm(m){
   document.getElementById('m_fa_ssd').value = m.fa_ssd||'';
   document.getElementById('m_fa_od').value = m.fa_od||'';
   document.getElementById('m_note').value = m.note||'';
+  document.getElementById('m_exposure').value = m.exposure||'';
+  document.getElementById('m_airentrained').value = m.airentrained||'No';
+  document.getElementById('m_fcrmethod').value = m.fcrmethod||'no-data';
+  document.getElementById('m_stddev').value = m.stddev||'';
+  document.getElementById('m_testn').value = m.testn||'';
+  document.getElementById('m_wcm').value = m.wcm||'';
+  document.getElementById('m_wcmsource').value = m.wcmsource||'auto';
+  document.getElementById('m_scmtype').value = m.scmtype||'none';
+  document.getElementById('m_flyash').value = m.flyash||'';
+  document.getElementById('m_slag').value = m.slag||'';
+  document.getElementById('m_silicafume').value = m.silicafume||'';
+  document.getElementById('m_fa_manufactured').value = m.fa_manufactured||'No';
+  document.getElementById('m_fa_fm').value = m.fa_fm||'';
+  document.getElementById('m_fa_sg').value = m.fa_sg||'';
+  document.getElementById('m_fa_absorption').value = m.fa_absorption||'';
+  document.getElementById('m_fa_moisture').value = m.fa_moisture||'';
+  document.getElementById('m_ca_rounded').value = m.ca_rounded||'No';
+  document.getElementById('m_ca_sg').value = m.ca_sg||'';
+  document.getElementById('m_ca_unitweight').value = m.ca_unitweight||'';
+  document.getElementById('m_ca_absorption').value = m.ca_absorption||'';
+  document.getElementById('m_ca_moisture').value = m.ca_moisture||'';
+  document.getElementById('m_cement_sg').value = m.cement_sg||'';
+  document.getElementById('m_cafa_override').value = m.cafa_override||'No';
+  document.getElementById('m_cafa_ratio').value = m.cafa_ratio||'';
 }
 function editMix(id){
   const m = mixes.find(x=>x.id===id);
@@ -602,7 +728,31 @@ document.getElementById('btnSaveMix').addEventListener('click', async ()=>{
     ca_od: document.getElementById('m_ca_od').value,
     fa_ssd: document.getElementById('m_fa_ssd').value,
     fa_od: document.getElementById('m_fa_od').value,
-    note: document.getElementById('m_note').value
+    note: document.getElementById('m_note').value,
+    exposure: document.getElementById('m_exposure').value,
+    airentrained: document.getElementById('m_airentrained').value,
+    fcrmethod: document.getElementById('m_fcrmethod').value,
+    stddev: document.getElementById('m_stddev').value,
+    testn: document.getElementById('m_testn').value,
+    wcm: document.getElementById('m_wcm').value,
+    wcmsource: document.getElementById('m_wcmsource').value,
+    scmtype: document.getElementById('m_scmtype').value,
+    flyash: document.getElementById('m_flyash').value,
+    slag: document.getElementById('m_slag').value,
+    silicafume: document.getElementById('m_silicafume').value,
+    fa_manufactured: document.getElementById('m_fa_manufactured').value,
+    fa_fm: document.getElementById('m_fa_fm').value,
+    fa_sg: document.getElementById('m_fa_sg').value,
+    fa_absorption: document.getElementById('m_fa_absorption').value,
+    fa_moisture: document.getElementById('m_fa_moisture').value,
+    ca_rounded: document.getElementById('m_ca_rounded').value,
+    ca_sg: document.getElementById('m_ca_sg').value,
+    ca_unitweight: document.getElementById('m_ca_unitweight').value,
+    ca_absorption: document.getElementById('m_ca_absorption').value,
+    ca_moisture: document.getElementById('m_ca_moisture').value,
+    cement_sg: document.getElementById('m_cement_sg').value,
+    cafa_override: document.getElementById('m_cafa_override').value,
+    cafa_ratio: document.getElementById('m_cafa_ratio').value
   };
   if(editingMixId){
     const oldName = mixes.find(m=>m.id===editingMixId)?.name;
@@ -850,13 +1000,11 @@ function renderMixTable(){
   thead.innerHTML = '<tr>' + MIX_HEADERS.filter(h=>h!=='ID').map(h=>`<th>${h}</th>`).join('') + '<th>عملیات</th></tr>';
   const rows = mixes.filter(m=>!filter || m.name.toLowerCase().includes(filter));
   if(!rows.length){ tbody.innerHTML = `<tr><td colspan="${MIX_HEADERS.length}" class="empty">داده‌ای ثبت نشده است</td></tr>`; return; }
-  tbody.innerHTML = rows.map(m=>`<tr>
-    <td><b>${m.name}</b></td><td>${m.date||''}</td><td>${m.unit||'MPa'}</td><td>${m.fc||''}</td><td>${m.fcr||''}</td><td>${m.slump||''}</td><td>${m.nmsa||''}</td>
-    <td>${m.air||''}</td><td>${m.temp||''}</td><td>${m.admix||''}</td><td>${m.basewater||''}</td>
-    <td>${m.adwater||''}</td><td>${m.cement||''}</td><td>${m.cementadj||''}</td><td>${m.ca_ssd||''}</td><td>${m.ca_od||''}</td>
-    <td>${m.fa_ssd||''}</td><td>${m.fa_od||''}</td><td>${m.note||''}</td>
-    <td style="display:flex;gap:6px"><button class="btn-outline btn-sm" onclick="editMix('${m.id}')">ویرایش</button><button class="btn-danger btn-sm" onclick="deleteMix('${m.id}')">حذف</button></td>
-  </tr>`).join('');
+  const dataKeys = MIX_KEYS.filter(k=>k!=='id');
+  tbody.innerHTML = rows.map(m=>{
+    const cells = dataKeys.map(k=> k==='name' ? `<td><b>${m[k]||''}</b></td>` : `<td>${m[k]||''}</td>`).join('');
+    return `<tr>${cells}<td style="display:flex;gap:6px"><button class="btn-outline btn-sm" onclick="editMix('${m.id}')">ویرایش</button><button class="btn-danger btn-sm" onclick="deleteMix('${m.id}')">حذف</button></td></tr>`;
+  }).join('');
 }
 
 function renderSampleTable(){
@@ -899,6 +1047,95 @@ function individualMinMPa(fcRaw, unit){
   const marginOriginal = unit === 'PSI' ? 500 : 3.5;
   return toMPa(fc - marginOriginal, unit);
 }
+
+/* ============ ACI 318-19 Table 26.12.3.1: required average strength (f'cr) ============ */
+
+// Table 26.12.3.1(c) — modification factor applied to s when fewer than 30 tests are available.
+// Returns null when n<15 (insufficient data to use a standard deviation at all).
+function stdDevModFactor(n){
+  if(!n || n < 15) return null;
+  if(n >= 30) return 1.00;
+  const table = [[15,1.16],[20,1.08],[25,1.03],[30,1.00]];
+  for(let i=0;i<table.length-1;i++){
+    const [n1,f1] = table[i], [n2,f2] = table[i+1];
+    if(n >= n1 && n <= n2) return f1 + (f2-f1) * (n-n1)/(n2-n1);
+  }
+  return 1.00;
+}
+
+// Table 26.12.3.1(a) — used when no statistical data (s) is available.
+function computeFcrNoData(fc, unit){
+  if(unit === 'PSI'){
+    if(fc < 3000) return fc + 1000;
+    if(fc <= 5000) return fc + 1200;
+    return 1.10*fc + 700;
+  }
+  if(fc < 21) return fc + 7.0;
+  if(fc <= 35) return fc + 8.3;
+  return 1.10*fc + 5.0;
+}
+
+// Table 26.12.3.1(b) — used when a sample standard deviation s (n≥15) is available.
+// Returns null if n<15 (caller should fall back to computeFcrNoData in that case).
+function computeFcrFromStdDev(fc, unit, sRaw, n){
+  const modFactor = stdDevModFactor(n);
+  if(modFactor === null) return null;
+  const s = sRaw * modFactor;
+  const a = fc + 1.34*s;
+  const b = unit === 'PSI'
+    ? (fc <= 5000 ? (fc + 2.33*s - 500) : (0.90*fc + 2.33*s))
+    : (fc <= 35   ? (fc + 2.33*s - 3.45) : (0.90*fc + 2.33*s));
+  return { value: Math.max(a,b), modFactor };
+}
+
+function recalcFcr(){
+  const method = document.getElementById('m_fcrmethod').value;
+  const noteEl = document.getElementById('fcrNote');
+  const fcrInput = document.getElementById('m_fcr');
+  const fc = Number(document.getElementById('m_fc').value);
+  const unit = document.getElementById('m_unit').value;
+
+  if(method === 'override'){
+    fcrInput.readOnly = false;
+    noteEl.textContent = 'مقدار F\'cr به‌صورت دستی توسط شما وارد می‌شود.';
+    return;
+  }
+  if(!fc){
+    noteEl.textContent = 'برای محاسبه‌ی خودکار F\'cr ابتدا F\'c را وارد کنید.';
+    return;
+  }
+
+  if(method === 'no-data'){
+    const val = computeFcrNoData(fc, unit);
+    fcrInput.value = Math.round(val*10)/10;
+    noteEl.innerHTML = `محاسبه‌شده طبق <b>ACI 318 Table 26.12.3.1(a)</b> (بدون داده آماری).`;
+    return;
+  }
+
+  if(method === 'std-dev'){
+    const s = Number(document.getElementById('m_stddev').value);
+    const n = Number(document.getElementById('m_testn').value);
+    if(!s || !n){
+      noteEl.textContent = 'برای این روش، انحراف معیار (s) و تعداد آزمون (n) را وارد کنید.';
+      return;
+    }
+    if(n < 15){
+      const val = computeFcrNoData(fc, unit);
+      fcrInput.value = Math.round(val*10)/10;
+      noteEl.innerHTML = `تعداد آزمون (n=${n}) کمتر از ۱۵ است — طبق ACI 318 باید از <b>Table 26.12.3.1(a)</b> (بدون داده آماری) استفاده شود.`;
+      return;
+    }
+    const res = computeFcrFromStdDev(fc, unit, s, n);
+    fcrInput.value = Math.round(res.value*10)/10;
+    noteEl.innerHTML = `محاسبه‌شده طبق <b>ACI 318 Table 26.12.3.1(b)</b>، با ضریب اصلاح انحراف معیار ${res.modFactor.toFixed(2)} برای n=${n} (Table 26.12.3.1c).`;
+  }
+}
+
+['m_fc','m_unit','m_fcrmethod','m_stddev','m_testn'].forEach(id=>{
+  document.getElementById(id).addEventListener('change', recalcFcr);
+  document.getElementById(id).addEventListener('input', recalcFcr);
+});
+document.getElementById('btnCalcFcr').addEventListener('click', recalcFcr);
 
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "Vazirmatn, Tahoma, Segoe UI, sans-serif";
@@ -1016,6 +1253,7 @@ if (typeof Chart !== 'undefined') {
 let chartBarInstance = null, chartLineInstance = null, chartGapInstance = null;
 
 function renderCharts(){
+  renderAciComplianceTable();
   if(typeof Chart === 'undefined') return;
   renderComplianceStrip();
   renderGapChart();
@@ -1024,20 +1262,93 @@ function renderCharts(){
   populateChartMixSelect();
 }
 
+/* ============ ACI 318 §26.12.3 / ACI 214 test-result compliance ============ */
+function computeAciCompliance(m){
+  const fc = toMPa(m.fc, m.unit);
+  if(fc === null) return null;
+  const indivMin = individualMinMPa(m.fc, m.unit);
+
+  let ageUsed = '28';
+  let pool = samples.filter(s=>s.mixName===m.name && String(s.age)==='28' && s.strength!=='');
+  if(!pool.length){
+    const ages = [...new Set(samples.filter(s=>s.mixName===m.name && s.strength!=='').map(s=>String(s.age)))];
+    if(ages.length){
+      ageUsed = ages.sort((a,b)=>Number(b)-Number(a))[0];
+      pool = samples.filter(s=>s.mixName===m.name && String(s.age)===ageUsed && s.strength!=='');
+    }
+  }
+  if(!pool.length) return null;
+
+  pool = pool.slice().sort((a,b)=>{
+    const da = a.breakdate || a.castdate || '';
+    const db = b.breakdate || b.castdate || '';
+    return da < db ? -1 : da > db ? 1 : 0;
+  });
+  const vals = pool.map(displayStrength);
+
+  const individualFails = indivMin !== null ? vals.filter(v=>v < indivMin).length : 0;
+  let tripleTotal = 0, tripleFails = 0;
+  for(let i=0;i+2<vals.length;i++){
+    tripleTotal++;
+    if((vals[i]+vals[i+1]+vals[i+2])/3 < fc) tripleFails++;
+  }
+  const pass = individualFails===0 && tripleFails===0;
+  return { name: m.name, ageUsed, n: vals.length, fc, indivMin, individualFails, tripleTotal, tripleFails, pass };
+}
+
+function renderAciComplianceTable(){
+  const wrap = document.getElementById('aciComplianceWrap');
+  const empty = document.getElementById('aciComplianceEmpty');
+  if(!wrap) return;
+  const rows = mixes.map(computeAciCompliance).filter(Boolean);
+  if(!rows.length){ empty.style.display = 'block'; wrap.style.display = 'none'; return; }
+  empty.style.display = 'none';
+  wrap.style.display = 'block';
+  const thead = document.querySelector('#tblAciCompliance thead');
+  const tbody = document.querySelector('#tblAciCompliance tbody');
+  thead.innerHTML = '<tr><th>طرح اختلاط</th><th>سن ارزیابی</th><th>تعداد نمونه</th><th>حداقل مجاز تکی</th><th>تخطی معیار تکی</th><th>میانگین‌های ۳تایی زیر F\'c</th><th>وضعیت</th></tr>';
+  tbody.innerHTML = rows.map(r=>{
+    const statusBadge = r.pass
+      ? `<span class="pill" style="background:rgba(31,138,76,.15);color:#1f8a4c">مطابق</span>`
+      : `<span class="pill" style="background:rgba(192,57,43,.15);color:#c0392b">نامطابق</span>`;
+    const tripleText = r.tripleTotal ? `${r.tripleFails} از ${r.tripleTotal}` : 'داده کافی نیست (n<3)';
+    return `<tr>
+      <td><b>${r.name}</b></td>
+      <td>${r.ageUsed} روزه</td>
+      <td>${r.n}</td>
+      <td>${r.indivMin !== null ? r.indivMin.toFixed(1)+' MPa' : '—'}</td>
+      <td>${r.individualFails}</td>
+      <td>${tripleText}</td>
+      <td>${statusBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
 /* ============ Compliance KPI strip ============ */
 function renderComplianceStrip(){
   const strip = document.getElementById('complianceStrip');
   if(!strip) return;
   const rows = computeMixGapData().filter(r=>r.avgTested !== null);
-  if(!rows.length){ strip.innerHTML = ''; return; }
-  const passCount = rows.filter(r=>r.avgTested >= r.fc).length;
-  const failCount = rows.length - passCount;
-  const avgDeltaPct = rows.reduce((a,r)=>a + ((r.avgTested - r.fc) / r.fc * 100), 0) / rows.length;
-  strip.innerHTML = `
-    <div class="stat ok"><b>${passCount}</b><span>طرح با مقاومت تست‌شده ≥ طراحی</span></div>
-    <div class="stat ${failCount ? 'danger' : ''}"><b>${failCount}</b><span>طرح با مقاومت تست‌شده کمتر از طراحی</span></div>
-    <div class="stat ${avgDeltaPct >= 0 ? 'ok' : 'danger'}"><b>${avgDeltaPct >= 0 ? '+' : ''}${avgDeltaPct.toFixed(1)}%</b><span>میانگین فاصله با مقاومت طراحی</span></div>
-  `;
+  const aciRows = mixes.map(computeAciCompliance).filter(Boolean);
+  if(!rows.length && !aciRows.length){ strip.innerHTML = ''; return; }
+
+  let html = '';
+  if(rows.length){
+    const passCount = rows.filter(r=>r.avgTested >= r.fc).length;
+    const failCount = rows.length - passCount;
+    const avgDeltaPct = rows.reduce((a,r)=>a + ((r.avgTested - r.fc) / r.fc * 100), 0) / rows.length;
+    html += `
+      <div class="stat ok"><b>${passCount}</b><span>طرح با مقاومت تست‌شده ≥ طراحی</span></div>
+      <div class="stat ${failCount ? 'danger' : ''}"><b>${failCount}</b><span>طرح با مقاومت تست‌شده کمتر از طراحی</span></div>
+      <div class="stat ${avgDeltaPct >= 0 ? 'ok' : 'danger'}"><b>${avgDeltaPct >= 0 ? '+' : ''}${avgDeltaPct.toFixed(1)}%</b><span>میانگین فاصله با مقاومت طراحی</span></div>
+    `;
+  }
+  if(aciRows.length){
+    const aciPass = aciRows.filter(r=>r.pass).length;
+    const aciFail = aciRows.length - aciPass;
+    html += `<div class="stat ${aciFail ? 'danger' : 'ok'}"><b>${aciPass}/${aciRows.length}</b><span>مطابقت با ACI 318 §26.12.3</span></div>`;
+  }
+  strip.innerHTML = html;
 }
 
 /* ============ Design vs Tested gap chart ============ */

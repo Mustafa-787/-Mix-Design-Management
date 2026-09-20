@@ -1,7 +1,7 @@
 // ConcreteLab Service Worker
 // Bump CACHE_NAME every time you edit index.html (or anything else here)
 // so returning users get the new version instead of a stale cached copy.
-const CACHE_NAME = 'concretelab-cache-v7';
+const CACHE_NAME = 'concretelab-cache-v9';
 
 const APP_SHELL = [
   './',
