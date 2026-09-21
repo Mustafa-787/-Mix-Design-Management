@@ -94,6 +94,34 @@
   .chart-legend .sw{display:inline-block;width:11px;height:11px;border-radius:3px;margin-inline-end:5px;vertical-align:-1px;}
   .chart-legend .sw.diamond{border-radius:2px;transform:rotate(45deg);width:9px;height:9px;}
   footer{text-align:center;color:var(--muted);font-size:11px;padding:20px;}
+
+  /* ============ Comprehensive report (print / Save as PDF) ============ */
+  #printReport{display:none;}
+  @media print{
+    body *{visibility:hidden;}
+    #printReport, #printReport *{visibility:visible;}
+    #printReport{display:block;position:absolute;top:0;left:0;width:100%;}
+    @page{ size:A4; margin:14mm; }
+  }
+  .report-header{text-align:center;border-bottom:3px solid var(--navy);padding-bottom:14px;margin-bottom:20px;}
+  .report-header h1{margin:0 0 6px;font-size:20px;color:var(--navy);}
+  .report-header .report-sub{font-size:12px;color:var(--muted);}
+  .report-header .report-meta{font-size:12px;color:var(--text);margin-top:8px;font-weight:600;}
+  .report-section{margin-bottom:26px;page-break-inside:avoid;}
+  .report-section h2{font-size:15px;color:var(--navy);border-right:4px solid var(--teal);padding-right:8px;margin:0 0 10px;}
+  .report-section h3{font-size:13px;color:var(--text);margin:14px 0 6px;}
+  .report-section img{max-width:100%;display:block;margin:6px auto 14px;border:1px solid var(--border);border-radius:6px;}
+  .kv-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:10px;}
+  .kv-table td{border:1px solid var(--border);padding:5px 8px;}
+  .kv-table td:first-child{background:#f4f7f9;font-weight:600;width:34%;color:var(--muted);}
+  .rpt-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:10px;}
+  .rpt-table th,.rpt-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;}
+  .rpt-table th{background:var(--navy);color:#fff;font-weight:700;}
+  .rpt-kpis{display:flex;gap:12px;flex-wrap:wrap;}
+  .rpt-kpis .k{border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;min-width:120px;}
+  .rpt-kpis .k b{display:block;font-size:17px;color:var(--navy);}
+  .rpt-kpis .k span{font-size:10.5px;color:var(--muted);}
+  .mix-block{page-break-before:always;}
 </style>
 </head>
 <body>
@@ -114,6 +142,7 @@
     <button class="btn-primary" id="btnOpen">باز کردن فایل موجود</button>
     <button class="btn-primary" id="btnNew" style="background:#134a63">ساخت فایل جدید</button>
     <button class="btn-ghost" id="btnDownload" style="display:none">دانلود نسخه پشتیبان</button>
+    <button class="btn-outline" id="btnFullReport">📄 گزارش جامع (PDF)</button>
     <button class="btn-ghost" id="btnInstallApp" style="display:none">⤓ نصب اپلیکیشن</button>
   </div>
 </header>
@@ -275,11 +304,42 @@
 
         <div class="field"><label>نیروی شکست (kN)</label><input id="s_load" type="number" step="0.01"></div>
         <div class="field"><label>مقاومت مستقیم (MPa) — اختیاری</label><input id="s_strengthManual" type="number" step="0.01" placeholder="در صورت عدم ورود نیرو"></div>
+        <div class="field"><label>شرایط عمل‌آوری (Curing)</label>
+          <select id="s_curing">
+            <option value="pool">استخر آب استاندارد (ASTM C511)</option>
+            <option value="room">اتاق کیورینگ استاندارد (Moist Room)</option>
+            <option value="field">درجا / شرایط کارگاه (Field Cured)</option>
+            <option value="air">خشک در هوا (بدون کیورینگ)</option>
+            <option value="other">سایر</option>
+          </select>
+        </div>
+
+        <div class="field span-2"><label>نوع شکست (Failure Pattern — ASTM C39)</label>
+          <select id="s_failuremode">
+            <option value="">— ثبت نشده —</option>
+            <option value="type1">نوع ۱ — مخروطی (Cone)</option>
+            <option value="type2">نوع ۲ — مخروطی و شکافی (Cone &amp; Split)</option>
+            <option value="type3">نوع ۳ — مخروطی و برشی (Cone &amp; Shear)</option>
+            <option value="type4">نوع ۴ — برشی (Shear)</option>
+            <option value="type5">نوع ۵ — ستونی (Columnar)</option>
+            <option value="type6">نوع ۶ — نامنظم / جانبی (نامعتبر)</option>
+          </select>
+        </div>
+        <div class="field span-2" id="failureWarnNote" style="display:none;font-size:11.5px;color:var(--danger)">⚠ الگوی شکست نوع ۶ معمولاً نشانه‌ی مشکل در کلاهک‌گذاری، هم‌ترازی صفحات دستگاه یا کیفیت قالب است (ASTM C39) — نتیجه را با احتیاط تفسیر کنید.</div>
+
         <div class="field span-2"><label>یادداشت</label><input id="s_note"></div>
 
-        <div class="field" id="s_convFactorWrap" style="display:none"><label>ضریب تبدیل به معادل استوانه‌ای (اختیاری)</label><input id="s_convFactor" type="number" step="0.01" placeholder="مثلاً 0.8"></div>
+        <div class="field" id="s_convMethodWrap" style="display:none"><label>روش تبدیل به معادل استوانه‌ای</label>
+          <select id="s_convMethod">
+            <option value="const080">ضریب ثابت 0.80 (قاعده کلی رایج)</option>
+            <option value="en1992">بر اساس رده مقاومتی — EN 1992-1-1</option>
+            <option value="manual">مقدار دستی</option>
+          </select>
+        </div>
+        <div class="field" id="s_convFactorWrap" style="display:none"><label>ضریب تبدیل به معادل استوانه‌ای</label><input id="s_convFactor" type="number" step="0.01" placeholder="مثلاً 0.8"></div>
         <div class="field span-2" id="s_convNoteWrap" style="display:none"><label>یادداشت ضریب تبدیل</label><input id="s_convNote" placeholder="مثلاً بر اساس ACI 214 / منبع مورد استفاده"></div>
       </div>
+      <div id="outlierWarnNote" class="lock-note" style="display:none;background:#fdf0e0;border-color:#f1c98a"></div>
       <div class="actions-row">
         <button class="btn-outline" id="btnCancelSampleEdit" style="display:none">لغو ویرایش</button>
         <button class="btn-outline" id="btnClearSample">پاک‌کردن فرم</button>
@@ -434,8 +494,10 @@ const MIX_KEYS    = ["id","name","date","unit","fc","fcr","slump","nmsa","air","
   "ca_rounded","ca_sg","ca_unitweight","ca_absorption","ca_moisture",
   "cement_sg","cafa_override","cafa_ratio"];
 
-const SAMPLE_HEADERS = ["ID","طرح اختلاط","شماره نمونه","سن (روز)","تاریخ ساخت","تاریخ شکست","نوع قالب","شکل","ابعاد (mm)","سطح مقطع (mm²)","نیروی شکست (kN)","مقاومت اندازه‌گیری‌شده (MPa)","ضریب تبدیل به معادل استوانه‌ای","یادداشت ضریب تبدیل","معادل استوانه‌ای (MPa)","یادداشت"];
-const SAMPLE_KEYS    = ["id","mixName","num","age","castdate","breakdate","moldLabel","shape","dim","area","load","strength","convFactor","convNote","equivalentStrength","note"];
+const SAMPLE_HEADERS = ["ID","طرح اختلاط","شماره نمونه","سن (روز)","تاریخ ساخت","تاریخ شکست","نوع قالب","شکل","ابعاد (mm)","سطح مقطع (mm²)","نیروی شکست (kN)","مقاومت اندازه‌گیری‌شده (MPa)","ضریب تبدیل به معادل استوانه‌ای","یادداشت ضریب تبدیل","معادل استوانه‌ای (MPa)","یادداشت",
+  "شرایط عمل‌آوری","نوع شکست (ASTM C39)","روش تبدیل"];
+const SAMPLE_KEYS    = ["id","mixName","num","age","castdate","breakdate","moldLabel","shape","dim","area","load","strength","convFactor","convNote","equivalentStrength","note",
+  "curing","failuremode","convMethod"];
 
 const SHEET_MIX = "طرح‌های اختلاط";
 const SHEET_SAMPLE = "نمونه‌ها";
@@ -781,10 +843,79 @@ function updateMoldUI(){
   document.getElementById('s_dimCustomWrap').style.display = isCustom ? 'block' : 'none';
   document.getElementById('s_dimCustomLabel').textContent = shape === 'cylinder' ? 'قطر دلخواه (mm)' : 'ضلع دلخواه (mm)';
   const showConv = shape === 'cube';
+  document.getElementById('s_convMethodWrap').style.display = showConv ? 'block' : 'none';
   document.getElementById('s_convFactorWrap').style.display = showConv ? 'block' : 'none';
   document.getElementById('s_convNoteWrap').style.display = showConv ? 'block' : 'none';
+  if(showConv) updateConversion();
   updateAreaPreview();
 }
+
+/* ============ Cube → cylinder-equivalent conversion (standardized methods) ============ */
+// EN 1992-1-1 Table 3.1 / Table 11.1 official strength-class pairs (fck,cyl / fck,cube, MPa).
+// Ratio is interpolated by the tested cube strength against these standard class markers.
+const EN1992_CUBE_CYL = [
+  [15,12],[20,16],[25,20],[30,25],[37,30],[45,35],[50,40],[55,45],
+  [60,50],[67,55],[75,60],[85,70],[95,80],[105,90],[115,100]
+];
+function en1992Ratio(cubeStrength){
+  const table = EN1992_CUBE_CYL;
+  if(cubeStrength <= table[0][0]) return table[0][1]/table[0][0];
+  if(cubeStrength >= table[table.length-1][0]) return table[table.length-1][1]/table[table.length-1][0];
+  for(let i=0;i<table.length-1;i++){
+    const [cube1,cyl1] = table[i], [cube2,cyl2] = table[i+1];
+    if(cubeStrength >= cube1 && cubeStrength <= cube2){
+      const ratio1 = cyl1/cube1, ratio2 = cyl2/cube2;
+      const t = (cubeStrength - cube1) / (cube2 - cube1);
+      return ratio1 + (ratio2 - ratio1) * t;
+    }
+  }
+  return 0.80;
+}
+
+function currentCubeStrengthPreview(){
+  const load = n(document.getElementById('s_load').value);
+  const manual = n(document.getElementById('s_strengthManual').value);
+  if(manual !== '') return Number(manual);
+  const {shape, dim} = currentMoldInfo();
+  if(load !== '' && dim > 0){
+    const area = shape === 'cylinder' ? (Math.PI * dim * dim / 4) : (dim * dim);
+    return Math.round((load*1000/area) * 100) / 100;
+  }
+  return null;
+}
+
+function updateConversion(){
+  const method = document.getElementById('s_convMethod').value;
+  const factorInput = document.getElementById('s_convFactor');
+  const noteInput = document.getElementById('s_convNote');
+  if(method === 'manual'){
+    factorInput.readOnly = false;
+    return;
+  }
+  const cubeStrength = currentCubeStrengthPreview();
+  if(method === 'const080'){
+    factorInput.value = 0.80;
+    factorInput.readOnly = true;
+    noteInput.value = "ضریب ثابت 0.80 — قاعده کلی رایج تبدیل مکعب به استوانه";
+  } else if(method === 'en1992'){
+    if(cubeStrength === null){
+      noteInput.value = 'برای محاسبه بر اساس EN 1992-1-1، نیرو یا مقاومت مستقیم را وارد کنید.';
+      return;
+    }
+    const ratio = en1992Ratio(cubeStrength);
+    factorInput.value = Math.round(ratio*1000)/1000;
+    factorInput.readOnly = true;
+    noteInput.value = `بر اساس رده مقاومتی معادل EN 1992-1-1 (fck,cyl/fck,cube)، درون‌یابی‌شده برای مقاومت مکعبی ${cubeStrength} MPa`;
+  }
+}
+document.getElementById('s_convMethod').addEventListener('change', updateConversion);
+['s_load','s_strengthManual'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', ()=>{ if(currentMoldInfo().shape === 'cube') updateConversion(); });
+});
+document.getElementById('s_failuremode').addEventListener('change', (e)=>{
+  document.getElementById('failureWarnNote').style.display = e.target.value === 'type6' ? 'block' : 'none';
+});
+
 function currentMoldInfo(){
   const sel = document.getElementById('s_mold');
   const opt = sel.selectedOptions[0];
@@ -827,6 +958,11 @@ function clearSampleForm(){
   document.getElementById('s_age').value = '28';
   document.getElementById('s_ageCustomWrap').style.display = 'none';
   document.getElementById('s_mold').value = 'cyl150';
+  document.getElementById('s_curing').value = 'pool';
+  document.getElementById('s_failuremode').value = '';
+  document.getElementById('failureWarnNote').style.display = 'none';
+  document.getElementById('s_convMethod').value = 'const080';
+  document.getElementById('outlierWarnNote').style.display = 'none';
   updateMoldUI();
 }
 function cancelSampleEdit(){
@@ -856,15 +992,20 @@ function fillSampleForm(s){
   if(!matched) sel.value = s.shape === 'cube' ? 'cubeCustom' : 'cylCustom';
   updateMoldUI();
   if(sel.selectedOptions[0].dataset.dim === '') document.getElementById('s_dimCustom').value = s.dim || '';
-  if(s.shape === 'cube'){
-    document.getElementById('s_convFactor').value = s.convFactor || '';
-    document.getElementById('s_convNote').value = s.convNote || '';
-  }
+  document.getElementById('s_curing').value = s.curing || 'pool';
+  document.getElementById('s_failuremode').value = s.failuremode || '';
+  document.getElementById('failureWarnNote').style.display = s.failuremode === 'type6' ? 'block' : 'none';
   updateAreaPreview();
 
   document.getElementById('s_load').value = s.load || '';
   document.getElementById('s_strengthManual').value = (s.load === '' && s.strength !== '') ? s.strength : '';
   document.getElementById('s_note').value = s.note || '';
+  if(s.shape === 'cube'){
+    document.getElementById('s_convMethod').value = s.convMethod || 'manual';
+    document.getElementById('s_convFactor').value = s.convFactor || '';
+    document.getElementById('s_convNote').value = s.convNote || '';
+    updateConversion();
+  }
 }
 function editSample(id){
   const s = samples.find(x=>x.id===id);
@@ -906,6 +1047,7 @@ document.getElementById('btnSaveSample').addEventListener('click', async ()=>{
 
   const convFactor = shape === 'cube' ? document.getElementById('s_convFactor').value : '';
   const convNote = shape === 'cube' ? document.getElementById('s_convNote').value : '';
+  const convMethod = shape === 'cube' ? document.getElementById('s_convMethod').value : '';
   let equivalentStrength = '';
   if(strength !== ''){
     if(shape === 'cube' && convFactor !== '' && !isNaN(Number(convFactor))){
@@ -923,8 +1065,17 @@ document.getElementById('btnSaveSample').addEventListener('click', async ()=>{
     breakdate: document.getElementById('s_breakdate').value,
     moldLabel: label, shape, dim, area, load, strength,
     convFactor, convNote, equivalentStrength,
-    note: document.getElementById('s_note').value
+    note: document.getElementById('s_note').value,
+    curing: document.getElementById('s_curing').value,
+    failuremode: document.getElementById('s_failuremode').value,
+    convMethod
   };
+
+  const outlierMsg = checkOutlier(rec);
+  if(outlierMsg){
+    const proceed = confirm(outlierMsg + '\n\nآیا مایلید همین‌طور ذخیره شود؟');
+    if(!proceed) return;
+  }
 
   if(editingSampleId){
     const idx = samples.findIndex(s=>s.id===editingSampleId);
@@ -949,6 +1100,42 @@ function agePillClass(age){
 
 function displayStrength(s){
   return (s.equivalentStrength !== '' && s.equivalentStrength !== undefined) ? Number(s.equivalentStrength) : Number(s.strength);
+}
+
+/* ============ Statistical outlier flag (z-score, informational only) ============
+   Not a rejection criterion — ASTM C39 explicitly warns against discarding a low
+   result without cause. This only flags values that are statistically unusual
+   compared to other samples of the same mix + age, for the engineer to review. */
+function groupStats(vals){
+  const n = vals.length;
+  const mean = vals.reduce((a,b)=>a+b,0)/n;
+  const variance = vals.reduce((a,b)=>a+(b-mean)*(b-mean),0)/n;
+  return { mean, sd: Math.sqrt(variance), n };
+}
+
+function checkOutlier(rec){
+  if(rec.strength === '' || rec.strength === undefined) return null;
+  const group = samples.filter(s=>s.mixName===rec.mixName && String(s.age)===String(rec.age) && s.id!==rec.id && s.strength!=='');
+  if(group.length < 2) return null; // need at least 2 others (n>=3 total) for a meaningful spread
+  const vals = group.map(displayStrength);
+  const { mean, sd } = groupStats(vals);
+  if(sd === 0) return null;
+  const val = displayStrength(rec);
+  const z = Math.abs(val - mean) / sd;
+  if(z > 2){
+    return `⚠ این مقدار (${val} MPa) نسبت به سایر نمونه‌های همین طرح و سن (میانگین ${mean.toFixed(1)}، انحراف معیار ${sd.toFixed(1)}) یک انحراف آماری غیرعادی دارد (z=${z.toFixed(1)}).\nطبق ASTM C39، نتایج پرت نباید بدون دلیل فنی مشخص کنار گذاشته شوند — این فقط یک هشدار آماری است.`;
+  }
+  return null;
+}
+
+function isOutlierInGroup(rec, allSamples){
+  if(rec.strength === '' || rec.strength === undefined) return false;
+  const group = allSamples.filter(s=>s.mixName===rec.mixName && String(s.age)===String(rec.age) && s.strength!=='');
+  if(group.length < 3) return false;
+  const vals = group.map(displayStrength);
+  const { mean, sd } = groupStats(vals);
+  if(sd === 0) return false;
+  return Math.abs(displayStrength(rec) - mean) / sd > 2;
 }
 
 function renderStats(){
@@ -1007,6 +1194,16 @@ function renderMixTable(){
   }).join('');
 }
 
+function curingLabel(c){
+  return { pool:'استخر آب استاندارد', room:'اتاق کیورینگ', field:'درجا/کارگاه', air:'خشک در هوا', other:'سایر' }[c] || '';
+}
+function failureModeLabel(f){
+  return {
+    type1:'نوع ۱ (مخروطی)', type2:'نوع ۲ (مخروطی و شکافی)', type3:'نوع ۳ (مخروطی و برشی)',
+    type4:'نوع ۴ (برشی)', type5:'نوع ۵ (ستونی)', type6:'نوع ۶ (نامعتبر)'
+  }[f] || '';
+}
+
 function renderSampleTable(){
   const mixFilter = document.getElementById('filterSampleMix').value;
   const ageFilter = document.getElementById('filterSampleAge').value;
@@ -1017,16 +1214,26 @@ function renderSampleTable(){
   if(mixFilter) rows = rows.filter(s=>s.mixName===mixFilter);
   if(ageFilter) rows = rows.filter(s=>String(s.age)===ageFilter);
   if(!rows.length){ tbody.innerHTML = `<tr><td colspan="${SAMPLE_HEADERS.length}" class="empty">داده‌ای ثبت نشده است</td></tr>`; return; }
-  tbody.innerHTML = rows.map(s=>`<tr>
+  tbody.innerHTML = rows.map(s=>{
+    const outlier = isOutlierInGroup(s, samples);
+    const strengthCell = outlier
+      ? `<b>${s.strength||''}</b> <span class="pill" style="background:rgba(184,134,11,.18);color:#8a6100" title="انحراف آماری غیرعادی نسبت به سایر نمونه‌های هم‌طرح و هم‌سن">⚠ پرت</span>`
+      : `<b>${s.strength||''}</b>`;
+    const failCell = s.failuremode === 'type6'
+      ? `${failureModeLabel(s.failuremode)} <span style="color:var(--danger)" title="الگوی نامعتبر — احتمال خطای کلاهک/دستگاه">⚠</span>`
+      : failureModeLabel(s.failuremode);
+    return `<tr>
     <td><b>${s.mixName}</b></td><td>${s.num||''}</td>
     <td><span class="pill ${agePillClass(s.age)}">${s.age} روزه</span></td>
     <td>${s.castdate||''}</td><td>${s.breakdate||''}</td>
     <td>${s.moldLabel||''}</td><td>${s.shape==='cube'?'مکعبی':(s.shape==='cylinder'?'استوانه‌ای':'')}</td><td>${s.dim||''}</td>
-    <td>${s.area||''}</td><td>${s.load||''}</td><td><b>${s.strength||''}</b></td>
+    <td>${s.area||''}</td><td>${s.load||''}</td><td>${strengthCell}</td>
     <td>${s.convFactor||''}</td><td>${s.convNote||''}</td><td>${s.equivalentStrength!==''&&s.equivalentStrength!==undefined?('<b>'+s.equivalentStrength+'</b>'):''}</td>
     <td>${s.note||''}</td>
+    <td>${curingLabel(s.curing)}</td><td>${failCell}</td><td>${s.convMethod||''}</td>
     <td style="display:flex;gap:6px"><button class="btn-outline btn-sm" onclick="editSample('${s.id}')">ویرایش</button><button class="btn-danger btn-sm" onclick="deleteSample('${s.id}')">حذف</button></td>
-  </tr>`).join('');
+  </tr>`;
+  }).join('');
 }
 
 /* ============ Chart.js engineering setup (plugins, palette, unit helpers) ============ */
@@ -1139,6 +1346,7 @@ document.getElementById('btnCalcFcr').addEventListener('click', recalcFcr);
 
 if (typeof Chart !== 'undefined') {
   Chart.defaults.font.family = "Vazirmatn, Tahoma, Segoe UI, sans-serif";
+  Chart.defaults.animation = false;
   Chart.defaults.color = '#1c2b36';
   Chart.defaults.borderColor = 'rgba(226,232,238,.9)';
   Chart.defaults.plugins.tooltip.rtl = true;
@@ -1678,6 +1886,147 @@ function renderAll(){
 
 populateMixSelects();
 
+/* ============ Comprehensive PDF report (print → Save as PDF) ============ */
+function esc(v){
+  return String(v===undefined||v===null?'':v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function kvRows(pairs){
+  return pairs.filter(([,v])=>v!==''&&v!==undefined&&v!==null)
+    .map(([label,v])=>`<tr><td>${esc(label)}</td><td>${esc(v)}</td></tr>`).join('');
+}
+
+function mixParamRows(m){
+  const pairs = MIX_KEYS.map((k,i)=>[MIX_HEADERS[i], m[k]]).filter(([h])=>h!=='ID' && h!=="نام طرح اختلاط");
+  return kvRows(pairs);
+}
+
+function buildMixSamplesTable(mixName){
+  const rows = samples.filter(s=>s.mixName===mixName);
+  if(!rows.length) return '<p style="font-size:11.5px;color:var(--muted)">نمونه‌ای برای این طرح ثبت نشده است.</p>';
+  const head = ['شماره','سن','تاریخ ساخت','تاریخ شکست','قالب','مقاومت (MPa)','معادل استوانه‌ای','شرایط عمل‌آوری','نوع شکست'].map(h=>`<th>${h}</th>`).join('');
+  const body = rows.map(s=>`<tr>
+    <td>${esc(s.num)}</td><td>${esc(s.age)}</td><td>${esc(s.castdate)}</td><td>${esc(s.breakdate)}</td>
+    <td>${esc(s.moldLabel)}</td><td>${esc(s.strength)}</td><td>${esc(s.equivalentStrength)}</td>
+    <td>${esc(curingLabel(s.curing))}</td><td>${esc(failureModeLabel(s.failuremode))}</td>
+  </tr>`).join('');
+  return `<table class="rpt-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function buildAciComplianceReportTable(){
+  const rows = mixes.map(computeAciCompliance).filter(Boolean);
+  if(!rows.length) return '<p style="font-size:11.5px;color:var(--muted)">داده‌ی کافی برای این ارزیابی وجود ندارد.</p>';
+  const head = ["طرح اختلاط","سن ارزیابی","تعداد نمونه","حداقل مجاز تکی","تخطی معیار تکی","میانگین‌های ۳تایی زیر F'c","وضعیت"].map(h=>`<th>${h}</th>`).join('');
+  const body = rows.map(r=>`<tr>
+    <td>${esc(r.name)}</td><td>${r.ageUsed} روزه</td><td>${r.n}</td>
+    <td>${r.indivMin!==null?r.indivMin.toFixed(1)+' MPa':'—'}</td><td>${r.individualFails}</td>
+    <td>${r.tripleTotal? r.tripleFails+' از '+r.tripleTotal : 'n<3'}</td>
+    <td>${r.pass?'مطابق':'نامطابق'}</td>
+  </tr>`).join('');
+  return `<table class="rpt-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function buildGapReportTable(){
+  const rows = computeMixGapData();
+  if(!rows.length) return '';
+  const head = ["طرح اختلاط","F'c (MPa)","F'cr (MPa)","میانگین تست","سن استفاده‌شده","فاصله با طراحی"].map(h=>`<th>${h}</th>`).join('');
+  const body = rows.map(r=>{
+    if(r.avgTested===null) return `<tr><td>${esc(r.name)}</td><td>${r.fc.toFixed(1)}</td><td>${r.fcr!==null?r.fcr.toFixed(1):'—'}</td><td colspan="3">داده تست ندارد</td></tr>`;
+    const delta = r.avgTested - r.fc;
+    const sign = delta>=0?'+':'';
+    return `<tr><td>${esc(r.name)}</td><td>${r.fc.toFixed(1)}</td><td>${r.fcr!==null?r.fcr.toFixed(1):'—'}</td><td>${r.avgTested.toFixed(1)} (n=${r.n})</td><td>${r.usedAge} روزه</td><td>${sign}${delta.toFixed(1)} (${sign}${(delta/r.fc*100).toFixed(1)}%)</td></tr>`;
+  }).join('');
+  return `<table class="rpt-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+}
+
+function safeChartImage(chartInstance){
+  try{ return chartInstance ? chartInstance.toBase64Image() : null; }catch(e){ return null; }
+}
+
+function buildFullReport(){
+  if(!mixes.length){
+    toast('برای تهیه گزارش، حداقل یک طرح اختلاط باید ثبت شده باشد.');
+    return;
+  }
+
+  const originalTab = document.querySelector('.tab.active').dataset.tab;
+  const originalMixSelectValue = document.getElementById('chartMixSelect').value;
+
+  // Make sure the dashboard canvases have real layout size before we capture them.
+  activateTab('tabDashboard');
+
+  const genDate = new Date().toLocaleString('fa-IR');
+  const rows = computeMixGapData().filter(r=>r.avgTested!==null);
+  const passCount = rows.filter(r=>r.avgTested>=r.fc).length;
+  const aciRows = mixes.map(computeAciCompliance).filter(Boolean);
+  const aciPass = aciRows.filter(r=>r.pass).length;
+
+  let html = `
+    <div class="report-header">
+      <h1>گزارش جامع طرح‌های اختلاط و آزمایش مقاومت بتن</h1>
+      <div class="report-sub">BetonLAB &middot; تهیه‌شده در ${esc(genDate)}</div>
+      <div class="report-meta">تعداد طرح‌های اختلاط: ${mixes.length} &nbsp;|&nbsp; تعداد نمونه‌های ثبت‌شده: ${samples.length}</div>
+    </div>
+
+    <div class="report-section">
+      <h2>خلاصه شاخص‌های کلیدی</h2>
+      <div class="rpt-kpis">
+        <div class="k"><b>${passCount}/${rows.length}</b><span>طرح با مقاومت تست‌شده ≥ طراحی</span></div>
+        <div class="k"><b>${aciPass}/${aciRows.length}</b><span>مطابق با ACI 318 §26.12.3</span></div>
+        <div class="k"><b>${mixes.length}</b><span>طرح اختلاط ثبت‌شده</span></div>
+        <div class="k"><b>${samples.length}</b><span>نمونه‌ی آزمایش‌شده</span></div>
+      </div>
+    </div>
+
+    <div class="report-section">
+      <h2>فاصله مقاومت طراحی با مقاومت تست‌شده</h2>
+      ${buildGapReportTable()}
+      ${(function(){ const img = safeChartImage(chartGapInstance); return img ? `<img src="${img}">` : ''; })()}
+    </div>
+
+    <div class="report-section">
+      <h2>ارزیابی مطابقت با ACI 318 §26.12.3 (ACI 214)</h2>
+      ${buildAciComplianceReportTable()}
+    </div>
+
+    <div class="report-section">
+      <h2>نمودارهای مقایسه‌ای مقاومت (همه طرح‌ها)</h2>
+      ${(function(){ const img = safeChartImage(chartBarInstance); return img ? `<img src="${img}">` : ''; })()}
+      ${(function(){ const img = safeChartImage(chartLineInstance); return img ? `<img src="${img}">` : ''; })()}
+    </div>
+  `;
+
+  mixes.forEach(m=>{
+    renderMixDetailCharts(m.name);
+    const ageImg = safeChartImage(chartMixAgeInstance);
+    const compImg = safeChartImage(chartMixCompInstance);
+    html += `
+      <div class="report-section mix-block">
+        <h2>طرح اختلاط: ${esc(m.name)}</h2>
+        <table class="kv-table"><tbody>${mixParamRows(m)}</tbody></table>
+        ${ageImg ? `<h3>مقاومت نمونه‌ها بر حسب سن (با خطوط مرجع F'c / F'cr)</h3><img src="${ageImg}">` : ''}
+        ${compImg ? `<h3>ترکیب اجزای مخلوط</h3><img src="${compImg}">` : ''}
+        <h3>نمونه‌های ثبت‌شده این طرح</h3>
+        ${buildMixSamplesTable(m.name)}
+      </div>
+    `;
+  });
+
+  document.getElementById('printReport').innerHTML = html;
+
+  // restore the app UI exactly as the user had it before generating the report
+  if(originalMixSelectValue){
+    document.getElementById('chartMixSelect').value = originalMixSelectValue;
+    renderMixDetailCharts(originalMixSelectValue);
+  }
+  activateTab(originalTab);
+
+  setTimeout(()=>window.print(), 150);
+}
+
+document.getElementById('btnFullReport').addEventListener('click', buildFullReport);
+
+
 /* ============ PWA: service worker + install prompt ============ */
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -1712,5 +2061,6 @@ window.addEventListener('appinstalled', () => {
   toast('برنامه با موفقیت نصب شد.');
 });
 </script>
+<div id="printReport"></div>
 </body>
 </html>
