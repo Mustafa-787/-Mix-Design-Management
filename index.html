@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مدیریت طرح اختلاط بتن | ConcreteLab</title>
+<title></title>BetonLAB Studio| ConcreteLab</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -21,9 +21,27 @@
     --navy:#0f2942; --navy2:#153a5c; --teal:#0e8a7d; --teal-l:#12b3a2;
     --bg:#f4f7f9; --card:#ffffff; --border:#e2e8ee; --text:#1c2b36; --muted:#6b7f8e;
     --danger:#c0392b; --warn:#b8860b; --ok:#1f8a4c;
+    --input-bg:#fbfcfd; --th-bg:#f0f4f7; --row-hover:#f7fbfa;
+    --danger-bg:#fdecea; --lock-bg:#fff8e6; --lock-border:#f1e0a8;
+    --pill-age7:#e8f0fe; --pill-age28:#e6f7ee; --pill-age90:#fdf0e0; --pill-ageX:#f1e9fb;
+    --pill-age7-text:#1a56b0; --pill-ageX-text:#6a3fb5;
+    --navy-text:#0f2942;
     --radius:12px;
     font-family: "Vazirmatn","Tahoma","Segoe UI",sans-serif;
   }
+  :root[data-theme="dark"]{
+    --bg:#0c1720; --card:#132433; --border:#24394b; --text:#dfe8ee; --muted:#8fa3b3;
+    --danger:#e0564a; --warn:#d6a33c; --ok:#3bb872;
+    --input-bg:#0f2030; --th-bg:#1a3040; --row-hover:#17293a;
+    --danger-bg:rgba(224,86,74,.16); --lock-bg:rgba(214,163,60,.14); --lock-border:rgba(214,163,60,.4);
+    --pill-age7:rgba(58,120,220,.22); --pill-age28:rgba(59,184,114,.2); --pill-age90:rgba(214,163,60,.2); --pill-ageX:rgba(150,110,220,.22);
+    --pill-age7-text:#7fb0f5; --pill-ageX-text:#b79ce8;
+    --navy-text:#8fc4f0;
+  }
+  @media print{ :root, :root[data-theme="dark"]{
+    --bg:#f4f7f9; --card:#ffffff; --border:#e2e8ee; --text:#1c2b36; --muted:#6b7f8e;
+    --danger:#c0392b; --warn:#b8860b; --ok:#1f8a4c; --navy:#0f2942; --navy2:#153a5c;
+  }}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);}
   header{background:linear-gradient(135deg,var(--navy),var(--navy2));color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
@@ -38,9 +56,9 @@
   .btn-primary:hover{background:var(--teal-l);}
   .btn-ghost{background:rgba(255,255,255,.12);color:#fff;}
   .btn-ghost:hover{background:rgba(255,255,255,.22);}
-  .btn-outline{background:#fff;border:1px solid var(--border);color:var(--text);}
+  .btn-outline{background:var(--card);border:1px solid var(--border);color:var(--text);}
   .btn-outline:hover{border-color:var(--teal);color:var(--teal);}
-  .btn-danger{background:#fdecea;color:var(--danger);}
+  .btn-danger{background:var(--danger-bg);color:var(--danger);}
   .btn-danger:hover{background:var(--danger);color:#fff;}
   .btn-sm{padding:5px 10px;font-size:12px;border-radius:6px;}
   main{max-width:1180px;margin:22px auto;padding:0 16px 60px;}
@@ -51,41 +69,41 @@
   .panel.active{display:block;animation:fade .2s ease;}
   @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
   .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px;box-shadow:0 1px 3px rgba(15,41,66,.05);}
-  .card h2{font-size:15px;margin:0 0 16px;color:var(--navy);display:flex;align-items:center;gap:8px;}
+  .card h2{font-size:15px;margin:0 0 16px;color:var(--navy-text);display:flex;align-items:center;gap:8px;}
   .card h2 .badge{background:var(--teal);color:#fff;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:700;}
   .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
   .grid.cols-3{grid-template-columns:repeat(3,1fr);}
   .grid.cols-2{grid-template-columns:repeat(2,1fr);}
   @media(max-width:760px){.grid,.grid.cols-3,.grid.cols-2{grid-template-columns:repeat(2,1fr);}}
   .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600;}
-  .field input,.field select,.field textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:#fbfcfd;color:var(--text);}
-  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:#fff;}
+  .field input,.field select,.field textarea{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--input-bg);color:var(--text);}
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:var(--card);}
   .field.span-2{grid-column:span 2;}
   .field.span-4{grid-column:1/-1;}
-  .form-section-title{grid-column:1/-1;font-size:12px;font-weight:800;color:var(--navy);letter-spacing:.2px;border-top:1px dashed var(--border);padding-top:14px;margin-top:2px;}
+  .form-section-title{grid-column:1/-1;font-size:12px;font-weight:800;color:var(--navy-text);letter-spacing:.2px;border-top:1px dashed var(--border);padding-top:14px;margin-top:2px;}
   .grid > .form-section-title:first-child{border-top:none;padding-top:0;margin-top:0;}
   .actions-row{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;}
   table{width:100%;border-collapse:collapse;font-size:12.5px;}
   th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap;}
-  th{background:#f0f4f7;color:var(--navy);font-weight:700;position:sticky;top:0;}
-  tbody tr:hover{background:#f7fbfa;}
+  th{background:var(--th-bg);color:var(--navy-text);font-weight:700;position:sticky;top:0;}
+  tbody tr:hover{background:var(--row-hover);}
   .table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:10px;max-height:480px;overflow-y:auto;}
   .empty{padding:30px;text-align:center;color:var(--muted);font-size:13px;}
   .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 22px;border-radius:30px;font-size:13px;box-shadow:0 4px 14px rgba(0,0,0,.2);opacity:0;pointer-events:none;transition:.25s;z-index:99;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(-6px);}
   .toast.err{background:var(--danger);}
   .pill{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;}
-  .pill.age7{background:#e8f0fe;color:#1a56b0;}
-  .pill.age28{background:#e6f7ee;color:var(--ok);}
-  .pill.age90{background:#fdf0e0;color:var(--warn);}
-  .pill.ageX{background:#f1e9fb;color:#6a3fb5;}
-  .lock-note{font-size:12px;color:var(--muted);background:#fff8e6;border:1px solid #f1e0a8;padding:10px 14px;border-radius:8px;margin-bottom:16px;}
+  .pill.age7{background:var(--pill-age7);color:var(--pill-age7-text);}
+  .pill.age28{background:var(--pill-age28);color:var(--ok);}
+  .pill.age90{background:var(--pill-age90);color:var(--warn);}
+  .pill.ageX{background:var(--pill-ageX);color:var(--pill-ageX-text);}
+  .lock-note{font-size:12px;color:var(--muted);background:var(--lock-bg);border:1px solid var(--lock-border);padding:10px 14px;border-radius:8px;margin-bottom:16px;}
   .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
-  .toolbar input,.toolbar select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;}
+  .toolbar input,.toolbar select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--input-bg);color:var(--text);}
   .toolbar .grow{flex:1;min-width:160px;}
   .stat-strip{display:flex;gap:14px;margin-bottom:16px;flex-wrap:wrap;}
-  .stat{background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 18px;min-width:120px;}
-  .stat b{display:block;font-size:19px;color:var(--navy);}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 18px;min-width:120px;}
+  .stat b{display:block;font-size:19px;color:var(--navy-text);}
   .stat span{font-size:11px;color:var(--muted);}
   .stat.ok b{color:var(--ok);} .stat.warn b{color:var(--warn);} .stat.danger b{color:var(--danger);}
   .card h2 .badge-eng{background:var(--navy);}
@@ -98,27 +116,35 @@
   /* ============ Comprehensive report (print / Save as PDF) ============ */
   #printReport{display:none;}
   @media print{
+    html, body{ width:auto; height:auto; margin:0; padding:0; background:#fff; }
     body *{visibility:hidden;}
     #printReport, #printReport *{visibility:visible;}
-    #printReport{display:block;position:absolute;top:0;left:0;width:100%;}
+    #printReport{
+      display:block; visibility:visible;
+      position:absolute; top:0; left:0;
+      width:182mm;              /* A4 210mm minus 2×14mm margin — fixed physical width so a
+                                   narrow mobile viewport isn't blown up/scaled by the print engine */
+      margin:0; padding:0;
+      font-size:12px; line-height:1.5;
+    }
     @page{ size:A4; margin:14mm; }
   }
   .report-header{text-align:center;border-bottom:3px solid var(--navy);padding-bottom:14px;margin-bottom:20px;}
   .report-header h1{margin:0 0 6px;font-size:20px;color:var(--navy);}
   .report-header .report-sub{font-size:12px;color:var(--muted);}
   .report-header .report-meta{font-size:12px;color:var(--text);margin-top:8px;font-weight:600;}
-  .report-section{margin-bottom:26px;page-break-inside:avoid;}
+  .report-section{margin-bottom:26px;page-break-inside:avoid;width:100%;}
   .report-section h2{font-size:15px;color:var(--navy);border-right:4px solid var(--teal);padding-right:8px;margin:0 0 10px;}
   .report-section h3{font-size:13px;color:var(--text);margin:14px 0 6px;}
-  .report-section img{max-width:100%;display:block;margin:6px auto 14px;border:1px solid var(--border);border-radius:6px;}
-  .kv-table{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:10px;}
-  .kv-table td{border:1px solid var(--border);padding:5px 8px;}
+  .report-section img{width:100%;max-width:170mm;height:auto;display:block;margin:6px auto 14px;border:1px solid var(--border);border-radius:6px;box-sizing:border-box;}
+  .kv-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:11px;margin-bottom:10px;}
+  .kv-table td{border:1px solid var(--border);padding:5px 8px;word-break:break-word;}
   .kv-table td:first-child{background:#f4f7f9;font-weight:600;width:34%;color:var(--muted);}
-  .rpt-table{width:100%;border-collapse:collapse;font-size:10.5px;margin-bottom:10px;}
-  .rpt-table th,.rpt-table td{border:1px solid var(--border);padding:4px 6px;text-align:center;}
+  .rpt-table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:9.5px;margin-bottom:10px;}
+  .rpt-table th,.rpt-table td{border:1px solid var(--border);padding:4px 5px;text-align:center;word-break:break-word;overflow-wrap:break-word;}
   .rpt-table th{background:var(--navy);color:#fff;font-weight:700;}
   .rpt-kpis{display:flex;gap:12px;flex-wrap:wrap;}
-  .rpt-kpis .k{border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;min-width:120px;}
+  .rpt-kpis .k{border:1px solid var(--border);border-radius:8px;padding:8px 14px;text-align:center;min-width:120px;box-sizing:border-box;}
   .rpt-kpis .k b{display:block;font-size:17px;color:var(--navy);}
   .rpt-kpis .k span{font-size:10.5px;color:var(--muted);}
   .mix-block{page-break-before:always;}
@@ -128,8 +154,9 @@
 
 <header>
   <div style="display:flex;align-items:center;gap:12px;">
-    <div style="font-weight:800;font-size:20px;letter-spacing:.3px;flex-shrink:0;direction:ltr;">
-      <span style="color:#e7edf2;">Beton</span><span style="color:#4fb3e8;">LAB</span>
+    <div style="font-weight:800;font-size:20px;letter-spacing:.3px;flex-shrink:0;direction:ltr;display:flex;align-items:baseline;gap:6px;">
+      <span><span style="color:#e7edf2;">Beton</span><span style="color:#4fb3e8;">LAB</span></span>
+      <span style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);background:rgba(255,255,255,.12);padding:2px 7px;border-radius:10px;">V.7</span>
     </div>
     <div>
       <h1>مدیریت طرح اختلاط و نتایج آزمایش بتن</h1>
@@ -143,6 +170,7 @@
     <button class="btn-primary" id="btnNew" style="background:#134a63">ساخت فایل جدید</button>
     <button class="btn-ghost" id="btnDownload" style="display:none">دانلود نسخه پشتیبان</button>
     <button class="btn-outline" id="btnFullReport">📄 گزارش جامع (PDF)</button>
+    <button class="btn-ghost" id="btnThemeToggle" title="تغییر تم">🌙</button>
     <button class="btn-ghost" id="btnInstallApp" style="display:none">⤓ نصب اپلیکیشن</button>
   </div>
 </header>
@@ -339,7 +367,7 @@
         <div class="field" id="s_convFactorWrap" style="display:none"><label>ضریب تبدیل به معادل استوانه‌ای</label><input id="s_convFactor" type="number" step="0.01" placeholder="مثلاً 0.8"></div>
         <div class="field span-2" id="s_convNoteWrap" style="display:none"><label>یادداشت ضریب تبدیل</label><input id="s_convNote" placeholder="مثلاً بر اساس ACI 214 / منبع مورد استفاده"></div>
       </div>
-      <div id="outlierWarnNote" class="lock-note" style="display:none;background:#fdf0e0;border-color:#f1c98a"></div>
+      <div id="outlierWarnNote" class="lock-note" style="display:none"></div>
       <div class="actions-row">
         <button class="btn-outline" id="btnCancelSampleEdit" style="display:none">لغو ویرایش</button>
         <button class="btn-outline" id="btnClearSample">پاک‌کردن فرم</button>
@@ -1217,7 +1245,7 @@ function renderSampleTable(){
   tbody.innerHTML = rows.map(s=>{
     const outlier = isOutlierInGroup(s, samples);
     const strengthCell = outlier
-      ? `<b>${s.strength||''}</b> <span class="pill" style="background:rgba(184,134,11,.18);color:#8a6100" title="انحراف آماری غیرعادی نسبت به سایر نمونه‌های هم‌طرح و هم‌سن">⚠ پرت</span>`
+      ? `<b>${s.strength||''}</b> <span class="pill" style="background:rgba(184,134,11,.18);color:var(--warn)" title="انحراف آماری غیرعادی نسبت به سایر نمونه‌های هم‌طرح و هم‌سن">⚠ پرت</span>`
       : `<b>${s.strength||''}</b>`;
     const failCell = s.failuremode === 'type6'
       ? `${failureModeLabel(s.failuremode)} <span style="color:var(--danger)" title="الگوی نامعتبر — احتمال خطای کلاهک/دستگاه">⚠</span>`
@@ -1517,8 +1545,8 @@ function renderAciComplianceTable(){
   thead.innerHTML = '<tr><th>طرح اختلاط</th><th>سن ارزیابی</th><th>تعداد نمونه</th><th>حداقل مجاز تکی</th><th>تخطی معیار تکی</th><th>میانگین‌های ۳تایی زیر F\'c</th><th>وضعیت</th></tr>';
   tbody.innerHTML = rows.map(r=>{
     const statusBadge = r.pass
-      ? `<span class="pill" style="background:rgba(31,138,76,.15);color:#1f8a4c">مطابق</span>`
-      : `<span class="pill" style="background:rgba(192,57,43,.15);color:#c0392b">نامطابق</span>`;
+      ? `<span class="pill" style="background:rgba(31,138,76,.15);color:var(--ok)">مطابق</span>`
+      : `<span class="pill" style="background:rgba(192,57,43,.15);color:var(--danger)">نامطابق</span>`;
     const tripleText = r.tripleTotal ? `${r.tripleFails} از ${r.tripleTotal}` : 'داده کافی نیست (n<3)';
     return `<tr>
       <td><b>${r.name}</b></td>
@@ -1648,7 +1676,7 @@ function renderGapChart(){
         }
       },
       scales: {
-        x: { title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        x: { title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: gridColor() } },
         y: { grid: { display: false } }
       }
     }
@@ -1685,7 +1713,7 @@ function renderBarChart(){
         valueLabels: { enabled: true }
       },
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: gridColor() } },
         x: { grid: { display: false } }
       }
     }
@@ -1718,7 +1746,7 @@ function renderLineChart(){
       maintainAspectRatio: false,
       plugins: { legend: { position: 'bottom' } },
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: gridColor() } },
         x: { grid: { display: false } }
       }
     }
@@ -1804,7 +1832,7 @@ function renderMixDetailCharts(mixName){
         valueLabels: { enabled: true }
       },
       scales: {
-        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: 'rgba(226,232,238,.7)' } },
+        y: { beginAtZero: true, title: { display: true, text: 'مقاومت (MPa)' }, grid: { color: gridColor() } },
         x: { grid: { display: false } }
       }
     }
@@ -1886,6 +1914,36 @@ function renderAll(){
 
 populateMixSelects();
 
+/* ============ Dark mode ============ */
+function isDarkTheme(){
+  return document.documentElement.getAttribute('data-theme') === 'dark';
+}
+function gridColor(){
+  return isDarkTheme() ? 'rgba(255,255,255,.10)' : 'rgba(226,232,238,.7)';
+}
+function applyChartTheme(){
+  if(typeof Chart === 'undefined') return;
+  Chart.defaults.color = isDarkTheme() ? '#c9d4dc' : '#1c2b36';
+  Chart.defaults.borderColor = isDarkTheme() ? 'rgba(255,255,255,.14)' : 'rgba(226,232,238,.9)';
+}
+function setTheme(theme){
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('betonlab-theme', theme);
+  document.getElementById('btnThemeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  applyChartTheme();
+  renderCharts(); // rebuild chart instances so gridline/text colors pick up the new theme
+}
+(function initTheme(){
+  const saved = localStorage.getItem('betonlab-theme');
+  const theme = saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('btnThemeToggle').textContent = theme === 'dark' ? '☀️' : '🌙';
+  applyChartTheme();
+})();
+document.getElementById('btnThemeToggle').addEventListener('click', ()=>{
+  setTheme(isDarkTheme() ? 'light' : 'dark');
+});
+
 /* ============ Comprehensive PDF report (print → Save as PDF) ============ */
 function esc(v){
   return String(v===undefined||v===null?'':v).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1939,8 +1997,14 @@ function buildGapReportTable(){
   return `<table class="rpt-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
 }
 
-function safeChartImage(chartInstance){
-  try{ return chartInstance ? chartInstance.toBase64Image() : null; }catch(e){ return null; }
+function safeChartImage(chartInstance, printW, printH){
+  if(!chartInstance) return null;
+  try{
+    if(printW && printH) chartInstance.resize(printW, printH);
+    const img = chartInstance.toBase64Image();
+    if(printW && printH) chartInstance.resize(); // restore responsive sizing for the live UI
+    return img;
+  }catch(e){ return null; }
 }
 
 function buildFullReport(){
@@ -1981,7 +2045,7 @@ function buildFullReport(){
     <div class="report-section">
       <h2>فاصله مقاومت طراحی با مقاومت تست‌شده</h2>
       ${buildGapReportTable()}
-      ${(function(){ const img = safeChartImage(chartGapInstance); return img ? `<img src="${img}">` : ''; })()}
+      ${(function(){ const img = safeChartImage(chartGapInstance, 860, Math.max(220, rows.length*58+40)); return img ? `<img src="${img}">` : ''; })()}
     </div>
 
     <div class="report-section">
@@ -1991,15 +2055,15 @@ function buildFullReport(){
 
     <div class="report-section">
       <h2>نمودارهای مقایسه‌ای مقاومت (همه طرح‌ها)</h2>
-      ${(function(){ const img = safeChartImage(chartBarInstance); return img ? `<img src="${img}">` : ''; })()}
-      ${(function(){ const img = safeChartImage(chartLineInstance); return img ? `<img src="${img}">` : ''; })()}
+      ${(function(){ const img = safeChartImage(chartBarInstance, 860, 420); return img ? `<img src="${img}">` : ''; })()}
+      ${(function(){ const img = safeChartImage(chartLineInstance, 860, 420); return img ? `<img src="${img}">` : ''; })()}
     </div>
   `;
 
   mixes.forEach(m=>{
     renderMixDetailCharts(m.name);
-    const ageImg = safeChartImage(chartMixAgeInstance);
-    const compImg = safeChartImage(chartMixCompInstance);
+    const ageImg = safeChartImage(chartMixAgeInstance, 860, 380);
+    const compImg = safeChartImage(chartMixCompInstance, 480, 480);
     html += `
       <div class="report-section mix-block">
         <h2>طرح اختلاط: ${esc(m.name)}</h2>
